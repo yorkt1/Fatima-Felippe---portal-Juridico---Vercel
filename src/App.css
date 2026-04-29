@@ -1,0 +1,17 @@
+/* App.css - Estilos específicos da aplicação */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Menu responsivo para mobile */
+.menu-toggle {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .menu-toggle {
+    display: flex;
+  }
+}
