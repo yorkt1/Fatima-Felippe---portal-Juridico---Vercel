@@ -22,7 +22,7 @@ export default function AdminPage() {
     const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
-        const isAuthenticated = sessionStorage.getItem('adminAuthenticated');
+        const isAuthenticated = localStorage.getItem('adminAuthenticated');
         if (isAuthenticated !== 'true') {
             navigate('/admin-login');
         }

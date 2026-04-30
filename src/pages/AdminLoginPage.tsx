@@ -11,7 +11,7 @@ export default function AdminLoginPage() {
 
         if (password === 'Fatimaadv132!@#') {
             // Save authentication state
-            sessionStorage.setItem('adminAuthenticated', 'true');
+            localStorage.setItem('adminAuthenticated', 'true');
             navigate('/admin');
         } else {
             setError('Código de acesso incorreto');

@@ -374,6 +374,8 @@ body.overlay-open {
     position: relative;
     margin: 20px auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: justify;
+    line-height: 1.7;
 }
 
 .close-btn {
@@ -794,6 +796,11 @@ body.overlay-open {
     height: 100%;
     min-height: 350px;
     position: relative;
+}
+
+.hero-text p {
+    text-align: justify;
+    text-justify: inter-word;
 }
 
 /* Moldura Retangular */
