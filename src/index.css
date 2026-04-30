@@ -266,10 +266,6 @@ nav.main-nav a.active {
     text-decoration: none;
 }
 
-.post h3 a:hover {
-    text-decoration: underline;
-}
-
 .excerpt {
     color: var(--muted);
     font-size: 14px;
@@ -309,10 +305,6 @@ aside .widget {
     text-decoration: none;
 }
 
-.widget ol li a:hover {
-    text-decoration: underline;
-}
-
 /* Legacy list-compact (kept for other uses) */
 .list-compact {
     display: flex;
@@ -325,10 +317,6 @@ aside .widget {
     color: var(--accent);
     text-decoration: none;
     line-height: 1.5;
-}
-
-.list-compact a:hover {
-    text-decoration: underline;
 }
 
 
@@ -711,9 +699,8 @@ body.overlay-open {
     border-radius: 8px;
     border: 1px solid #e6e9ee;
     background: #fff;
-    color: var(--accent);
+    color: #333;
     text-decoration: none;
-    /* Ensure links acting as buttons don't have underline */
 }
 
 .btn.primary {
@@ -2372,5 +2359,10 @@ textarea.form-control {
 .tiptap-editor-content p,
 .article-section p {
     line-height: 1.5 !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 

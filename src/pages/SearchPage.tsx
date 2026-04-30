@@ -194,9 +194,20 @@ export default function SearchPage() {
             </div>
 
             {loading && (
-                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
-                    <div style={{ fontSize: '32px', marginBottom: '16px' }}>🔍</div>
-                    <p>Buscando em todos os conteúdos...</p>
+                <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                    <div style={{
+                        display: 'inline-block',
+                        width: '48px',
+                        height: '48px',
+                        border: '4px solid #e6e9ee',
+                        borderTopColor: 'var(--accent)',
+                        borderRadius: '50%',
+                        animation: 'spin 0.8s linear infinite',
+                        marginBottom: '20px',
+                    }} />
+                    <p style={{ color: 'var(--muted)', fontSize: '15px', margin: 0 }}>
+                        Buscando em todos os conteúdos...
+                    </p>
                 </div>
             )}
 
