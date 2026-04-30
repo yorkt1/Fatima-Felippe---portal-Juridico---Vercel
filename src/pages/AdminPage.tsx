@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
@@ -28,7 +28,7 @@ export default function AdminPage() {
         }
     }, [navigate]);
 
-    const fetchContent = async () => {
+    const fetchContent = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -42,22 +42,23 @@ export default function AdminPage() {
 
             if (error) throw error;
             setContentList(data || []);
-        } catch (error: any) {
-            console.error('Error fetching content:', error);
+        } catch (error: unknown) {
+            const err = error as { code?: string; message?: string };
+            console.error('Error fetching content:', err);
             setContentList([]);
-            if (error?.code === 'PGRST204' || error?.code === 'PGRST205' || error?.message?.includes('404')) {
+            if (err?.code === 'PGRST204' || err?.code === 'PGRST205' || err?.message?.includes('404')) {
                 setError('A tabela "contents" não foi encontrada. Por favor, crie a tabela no Supabase.');
             } else {
-                setError('Erro ao carregar conteúdo: ' + (error.message || 'Erro desconhecido'));
+                setError('Erro ao carregar conteúdo: ' + (err.message || 'Erro desconhecido'));
             }
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedType]);
 
     useEffect(() => {
         fetchContent();
-    }, [selectedType]);
+    }, [fetchContent]);
 
     // Drag and Drop Handlers
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {

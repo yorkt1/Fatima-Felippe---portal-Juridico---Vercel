@@ -39,7 +39,6 @@ function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
 
     // Constrói regex que ignora acentos fazendo replace de cada token
     const parts: { str: string; highlight: boolean }[] = [];
-    let remaining = text;
 
     // Abordagem simples: divide por posições
     const normalizedText = normalize(text);
@@ -73,7 +72,6 @@ function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
     }
     if (cursor < text.length) parts.push({ str: text.slice(cursor), highlight: false });
 
-    remaining; // suppress unused warning
     return (
         <>
             {parts.map((p, i) =>

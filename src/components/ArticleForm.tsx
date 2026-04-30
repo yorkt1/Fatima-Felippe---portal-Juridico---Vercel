@@ -194,7 +194,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             TableCell,
             TabIndent,
         ],
-        content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/ /g, ' '),
+        content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' '),
         onUpdate: ({ editor }) => {
             setFormData(prev => ({ ...prev, content: editor.getHTML() }));
         },
@@ -265,7 +265,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
             if (editor) {
                 // Insere no editor preservando HTML Rico, sem &nbsp; do Word
-                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/ /g, ' ');
+                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
                 editor.commands.setContent(cleanedContent);
             }
             alert("Documento Word importado com sucesso!");

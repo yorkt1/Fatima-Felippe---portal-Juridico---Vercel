@@ -13,8 +13,8 @@ function useCountUp(target: number, duration = 800) {
 
     useEffect(() => {
         if (target === 0) {
-            setCount(0);
-            return;
+            const timeout = setTimeout(() => setCount(0), 0);
+            return () => clearTimeout(timeout);
         }
         const startTime = performance.now();
 
