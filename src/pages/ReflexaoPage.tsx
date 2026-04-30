@@ -53,7 +53,7 @@ export default function ReflexaoPage() {
     }
 
     return (
-        <div className="container" style={{ padding: '20px 0' }}>
+        <div className="container" style={{ padding: '20px 18px' }}>
             <div className="article-content">
                 <button className="close-btn" onClick={() => navigate(-1)}>×</button>
 

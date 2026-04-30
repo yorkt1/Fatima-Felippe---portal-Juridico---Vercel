@@ -436,9 +436,11 @@ body.overlay-open {
     margin-bottom: 1.2em;
     text-justify: inter-word;
     white-space: normal !important;
-    word-break: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
     hyphens: none;
 }
+
 
 /* Força justificado (encostado nas extremidades) ignorando "left" ou "start" do Word, mas respeitando se o usuário centralizar ou alinhar à direita no Editor */
 .article-section p:not([style*="center"]):not([style*="right"]) {
@@ -1043,8 +1045,8 @@ body.overlay-open {
     }
 
     .article-content {
-        width: 95%;
-        padding: 20px;
+        width: 100%;
+        padding: 15px;
     }
 
     .article-hero-img {
