@@ -136,17 +136,17 @@ nav.main-nav a.active {
 
 /* Categorias */
 .category {
-    display: inline-block;
-    padding: 4px 10px;
-    background: #e6f7ff;
-    color: var(--accent);
-    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    display: inline-block;
     margin-bottom: 8px;
-    white-space: nowrap;
+    word-break: break-word;
+    background: #e6f7ff;
+    color: var(--accent);
+    letter-spacing: 0.5px;
 }
 
 .category.tributario,
