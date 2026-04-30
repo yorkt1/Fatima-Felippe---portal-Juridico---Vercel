@@ -154,7 +154,7 @@ export default function Home() {
                     <button
                         key={page}
                         onClick={() => onChange(page)}
-                        className={`btn ${current === page ? 'primary' : ''}`}
+                        className={`btn ${current === page ? 'active' : ''}`}
                     >
                         {page}
                     </button>
@@ -257,6 +257,7 @@ export default function Home() {
                                         alt={leadArticle.title}
                                         onError={(e) => {
                                             e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                                            e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                                         }}
                                     />
                                 </Link>
@@ -274,10 +275,23 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {/* 2 side cards */}
+                            {/* 2 side cards — card-small igual ao Copy.html */}
                             <div className="side-cards">
                                 {sideArticles.map((post) => (
-                                    <ArticleCard key={post.id} article={post} linkPrefix="artigo" />
+                                    <Link key={post.id} to={`/artigo/${post.id}`} className="card-small">
+                                        <span className={`category ${post.category}`}>{post.categoryName}</span>
+                                        <img
+                                            src={post.image}
+                                            loading="lazy"
+                                            alt={post.title}
+                                            onError={(e) => { 
+                                                e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                                                e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                                            }}
+                                        />
+                                        <h4 style={{ margin: '10px 0 6px', fontSize: '15px' }}>{toTitleCase(post.title)}</h4>
+                                        <div className="meta">por {post.author || 'Redação'} • {post.date}</div>
+                                    </Link>
                                 ))}
                             </div>
                         </>
@@ -307,9 +321,12 @@ export default function Home() {
                         <div className="widget">
                             <h4>Mais lidos</h4>
                             <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                                {posts.slice(0, 5).map((post) => (
+                                {posts.slice(0, 3).map((post) => (
                                     <li key={post.id}>
-                                        <Link to={`/artigo/${post.id}`}>{toTitleCase(post.title)}</Link>
+                                        <Link to={`/artigo/${post.id}`}>
+                                            <span className={`category ${post.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{post.categoryName.split(' ')[0]}</span>{' '}
+                                            {toTitleCase(post.title)}
+                                        </Link>
                                     </li>
                                 ))}
                             </ol>
@@ -342,9 +359,12 @@ export default function Home() {
                         <div className="widget">
                             <h4>Mais lidos</h4>
                             <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                                {reflexoes.slice(0, 5).map((reflexao) => (
+                                {reflexoes.slice(0, 3).map((reflexao) => (
                                     <li key={reflexao.id}>
-                                        <Link to={`/reflexao/${reflexao.id}`}>{toTitleCase(reflexao.title)}</Link>
+                                        <Link to={`/reflexao/${reflexao.id}`}>
+                                            <span className={`category ${reflexao.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{reflexao.categoryName.split(' ')[0]}</span>{' '}
+                                            {toTitleCase(reflexao.title)}
+                                        </Link>
                                     </li>
                                 ))}
                             </ol>
@@ -381,9 +401,12 @@ export default function Home() {
                         <div className="widget">
                             <h4>Mais lidos</h4>
                             <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                                {noticias.slice(0, 5).map((noticia) => (
+                                {noticias.slice(0, 3).map((noticia) => (
                                     <li key={noticia.id}>
-                                        <Link to={`/noticia/${noticia.id}`}>{toTitleCase(noticia.title)}</Link>
+                                        <Link to={`/noticia/${noticia.id}`}>
+                                            <span className={`category ${noticia.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{noticia.categoryName.split(' ')[0]}</span>{' '}
+                                            {toTitleCase(noticia.title)}
+                                        </Link>
                                     </li>
                                 ))}
                             </ol>

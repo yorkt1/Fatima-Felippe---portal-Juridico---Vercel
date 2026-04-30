@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
@@ -61,10 +62,10 @@ export default function NoticiasPage() {
                     <div className="widget">
                         <h4>Categorias</h4>
                         <div className="list-compact">
-                            <a href="#geral">Notícias Gerais</a>
-                            <a href="#juridico">Jurídico</a>
-                            <a href="#legislacao">Legislação</a>
-                            <a href="#tribunais">Tribunais</a>
+                            <Link to="/noticias">Notícias Gerais</Link>
+                            <Link to="/noticias">Jurídico</Link>
+                            <Link to="/noticias">Legislação</Link>
+                            <Link to="/noticias">Tribunais</Link>
                         </div>
                     </div>
 
@@ -72,9 +73,14 @@ export default function NoticiasPage() {
                         <div className="widget">
                             <h4>Mais lidos</h4>
                             <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                                {noticias.slice(0, 5).map((article) => (
+                                {noticias.slice(0, 3).map((article) => (
                                     <li key={article.id}>
-                                        <a href={`/noticia/${article.id}`}>{toTitleCase(article.title)}</a>
+                                        <Link to={`/noticia/${article.id}`}>
+                                            <span className={`category ${article.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                                {article.categoryName.split(' ')[0]}
+                                            </span>{' '}
+                                            {toTitleCase(article.title)}
+                                        </Link>
                                     </li>
                                 ))}
                             </ol>

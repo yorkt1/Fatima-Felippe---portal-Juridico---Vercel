@@ -19,12 +19,10 @@ export default function AboutPage() {
                 <div className="sobre-content">
                     <aside className="sobre-profile">
                         <div className="profile-image">
-                            {/* Assuming profile.jpg is in the public folder */}
-                            <img src="/profile.jpg" alt="Fátima T Felippe" onError={(e) => {
-                                // Fallback if image not found
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement!.innerText = 'FF';
-                            }} />
+                            <img
+                                src="https://res.cloudinary.com/dqewxdbfx/image/upload/v1777508324/profile_fz9eko.jpg"
+                                alt="Fátima T Felippe"
+                            />
                         </div>
                         <div className="profile-info">
                             <h3>Fátima T Felippe</h3>

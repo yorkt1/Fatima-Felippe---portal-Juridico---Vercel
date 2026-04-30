@@ -120,6 +120,42 @@ export default function AdminPage() {
         }
     };
 
+    const handleManualPositionChange = async (oldIndex: number, newIndex: number) => {
+        if (isNaN(newIndex)) return;
+        
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex >= contentList.length) newIndex = contentList.length - 1;
+        
+        if (oldIndex === newIndex) return;
+
+        const newContentList = [...contentList];
+        const [movedItem] = newContentList.splice(oldIndex, 1);
+        newContentList.splice(newIndex, 0, movedItem);
+
+        // Optimistic UI update
+        setContentList(newContentList);
+
+        const updates = newContentList.map((item, index) => ({
+            id: item.id,
+            position: index + 1
+        }));
+
+        try {
+            await Promise.all(updates.map(update =>
+                supabase
+                    .from('contents')
+                    .update({ position: update.position })
+                    .eq('id', update.id)
+            ));
+
+            showToast('Ordem atualizada com sucesso', 'success');
+        } catch (err) {
+            console.error('Error updating positions:', err);
+            showToast('Erro ao salvar a nova ordem', 'error');
+            fetchContent();
+        }
+    };
+
     const handleToggleFeatured = async (id: number, currentFeatured: boolean) => {
         const newFeaturedState = !currentFeatured;
 
@@ -282,8 +318,26 @@ export default function AdminPage() {
                                 className={`admin-card-grid ${item.featured ? 'featured' : ''}`}
                                 style={{ cursor: 'move' }}
                             >
-                                <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--muted)' }}>
-                                    ⋮⋮
+                                <div className="position-control">
+                                    <div className="position-drag-handle" title="Arraste para reordenar">⋮⋮</div>
+                                    <div className="position-input-wrapper">
+                                        <input 
+                                            key={`${item.id}-${index}`}
+                                            type="number" 
+                                            min="1" 
+                                            max={contentList.length} 
+                                            defaultValue={index + 1} 
+                                            onBlur={(e) => handleManualPositionChange(index, parseInt(e.target.value) - 1)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.currentTarget.blur();
+                                                }
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                            title="Digite a posição e aperte Enter"
+                                            className="position-input"
+                                        />
+                                    </div>
                                 </div>
                                 <img
                                     src={item.image}

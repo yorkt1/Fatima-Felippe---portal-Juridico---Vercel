@@ -21,6 +21,7 @@ body {
     scroll-behavior: smooth;
 }
 
+
 a {
     color: var(--accent);
     text-decoration: none;
@@ -69,6 +70,11 @@ nav.main-nav {
     display: flex;
     gap: 14px;
     align-items: center
+}
+
+nav.main-nav a.active {
+    color: var(--accent);
+    font-weight: 600;
 }
 
 .search {
@@ -124,13 +130,14 @@ nav.main-nav {
     display: inline-block;
     padding: 4px 10px;
     background: #e6f7ff;
-    color: #1890ff;
+    color: var(--accent);
     border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 8px;
+    white-space: nowrap;
 }
 
 .category.tributario,
@@ -189,29 +196,18 @@ nav.main-nav {
 
 .card-small {
     background: var(--card);
-    padding: 14px;
+    padding: 12px;
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.2s ease;
-}
-
-.card-small:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.card-small:hover h3 {
-    color: var(--accent);
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .card-small img {
     width: 100%;
-    height: 140px;
+    height: 96px;
     object-fit: cover;
     border-radius: 6px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    margin-bottom: 8px;
 }
 
 /* Image fallback - solid background if image fails to load */
@@ -249,21 +245,6 @@ nav.main-nav {
     background: var(--card);
     padding: 14px;
     border-radius: 10px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    color: #111;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.post:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.post:hover h3 {
-    color: var(--accent);
 }
 
 .post img {
@@ -271,11 +252,22 @@ nav.main-nav {
     height: 110px;
     object-fit: cover;
     border-radius: 8px;
+    display: block;
+    margin-bottom: 8px;
 }
 
 .post h3 {
     margin: 0 0 6px;
     font-size: 16px;
+}
+
+.post h3 a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.post h3 a:hover {
+    text-decoration: underline;
 }
 
 .excerpt {
@@ -286,6 +278,7 @@ nav.main-nav {
     hyphens: auto;
     margin-bottom: 12px;
 }
+
 
 /* Sidebar */
 aside .widget {
@@ -299,15 +292,43 @@ aside .widget {
     margin: 0 0 10px
 }
 
+/* Sidebar widget ol (Mais lidos) — igual ao Copy.html */
+.widget ol {
+    padding-left: 18px;
+    margin: 0;
+}
+
+.widget ol li {
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.widget ol li a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.widget ol li a:hover {
+    text-decoration: underline;
+}
+
+/* Legacy list-compact (kept for other uses) */
 .list-compact {
     display: flex;
     flex-direction: column;
-    gap: 10px
+    gap: 10px;
 }
 
 .list-compact a {
     font-size: 14px;
-    color: #0f172a
+    color: var(--accent);
+    text-decoration: none;
+    line-height: 1.5;
+}
+
+.list-compact a:hover {
+    text-decoration: underline;
 }
 
 
@@ -702,11 +723,28 @@ body.overlay-open {
 }
 
 .btn.active,
-.pagination .btn.primary {
-    background: #fff;
-    color: #111;
-    border-color: #9ca3af;
+.pagination .btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
     font-weight: 700;
+}
+
+/* Audio player nos artigos */
+.article-audio-player {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f0f0f0;
+    border-radius: 8px;
+}
+
+.article-audio-player p {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.article-audio-player audio {
+    width: 100%;
 }
 
 .btn:disabled {
@@ -830,8 +868,16 @@ body.overlay-open {
 
 /* Estilos para artigos justificados */
 .article-content {
+    background: var(--card);
+    width: 90%;
+    max-width: 800px;
+    border-radius: 12px;
+    padding: 30px;
+    position: relative;
+    margin: 20px auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     text-align: justify;
-    line-height: 1.8;
+    line-height: 1.7;
     /* Melhor legibilidade */
     font-size: 1.1rem;
     color: #333;
@@ -953,6 +999,7 @@ body.overlay-open {
 
 .titulo:hover {
     background: #0d66cc;
+    color: #fff;
     box-shadow: 0 6px 16px rgba(24, 144, 255, 0.35);
 }
 
@@ -987,15 +1034,6 @@ body.overlay-open {
 
     .lead-article img {
         height: 220px;
-    }
-
-    .post {
-        flex-direction: column;
-    }
-
-    .post img {
-        width: 100%;
-        height: 180px;
     }
 
     /* esconder cards laterais no mobile */
@@ -1212,7 +1250,91 @@ body.overlay-open {
     }
 }
 
+/* Cookie Banner */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid #e6e9ee;
+    padding: 16px 18px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 999;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.cookie-banner.active {
+    display: flex;
+}
+
+.cookie-message {
+    flex: 1;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.cookie-message a {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.cookie-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.cookie-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #e6e9ee;
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.cookie-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.cookie-btn.accept {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.cookie-btn.accept:hover {
+    background: #0959a8;
+    border-color: #0959a8;
+}
+
+@media (max-width: 768px) {
+    .cookie-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 16px;
+    }
+
+    .cookie-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
 /* --- CSS Adicionado para Páginas de Contato, Privacidade e Sobre --- */
+
 
 /* Form Elements */
 .form-group {
@@ -1884,7 +2006,7 @@ textarea.form-control {
 /* Admin Panel Responsive Styles */
 .admin-card-grid {
     display: grid;
-    grid-template-columns: 40px 100px 1fr auto;
+    grid-template-columns: 70px 100px 1fr auto;
     gap: 15px;
     align-items: center;
     border: 1px solid #e6e9ee;
@@ -1892,6 +2014,87 @@ textarea.form-control {
     padding: 15px;
     background: white;
     transition: background 0.2s;
+}
+
+/* Position Control in Admin */
+.position-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: #f8f9fa;
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid #eef0f3;
+    transition: all 0.2s ease;
+}
+
+.position-control:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+}
+
+.position-drag-handle {
+    cursor: move;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: 24px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 18px;
+    letter-spacing: -2px;
+    margin-right: -2px; /* Fix visual center for dots */
+}
+
+.position-drag-handle:hover {
+    color: var(--accent);
+    background: #e6f2ff;
+}
+
+.position-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.position-input-wrapper::before {
+    content: "Nº";
+    position: absolute;
+    left: 6px;
+    font-size: 10px;
+    color: #9ca3af;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.position-input {
+    width: 48px;
+    height: 28px;
+    text-align: center;
+    padding: 2px 4px 2px 18px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    background: white;
+    outline: none;
+    transition: all 0.2s;
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.position-input::-webkit-outer-spin-button,
+.position-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.position-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(11, 116, 218, 0.15);
 }
 
 .admin-card-grid.featured {

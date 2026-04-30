@@ -21,11 +21,13 @@ export default function CookieConsent() {
     return (
         <div className="cookie-banner active">
             <div className="cookie-message">
-                Este site utiliza cookies para melhorar sua experiência. Ao continuar, você concorda com nossa <Link to="/privacidade">Política de Privacidade</Link>.
+                Este site utiliza cookies para melhorar sua experiência. Ao continuar, você concorda com nossa{' '}
+                <Link to="/privacidade">Política de Privacidade</Link>.
             </div>
             <div className="cookie-actions">
                 <Link className="cookie-btn" to="/privacidade">Saiba mais</Link>
-                <button className="cookie-btn accept" onClick={acceptCookies}>Ok</button>
+                <button className="cookie-btn" onClick={() => setIsVisible(false)}>Recusar</button>
+                <button className="cookie-btn accept" onClick={acceptCookies}>Ok, entendi</button>
             </div>
         </div>
     );

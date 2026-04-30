@@ -54,11 +54,11 @@ export default function NoticiaPage() {
 
     return (
         <div className="container" style={{ padding: '20px 0' }}>
-            <div className="article-content" style={{ maxWidth: '800px', margin: '0 auto', background: 'white', padding: '30px', borderRadius: '12px', position: 'relative' }}>
+            <div className="article-content">
                 <button className="close-btn" onClick={() => navigate(-1)}>×</button>
 
                 <div className="article-header">
-                    <div className={`category ${noticia.category}`}>{noticia.categoryName}</div>
+                    <span className={`category ${noticia.category}`}>{noticia.categoryName}</span>
 
                     <div className="article-meta">
                         <div className="meta">

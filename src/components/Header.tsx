@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 export default function Header() {
@@ -15,7 +15,7 @@ export default function Header() {
     };
 
     return (
-        <header className="header">
+        <header style={{ position: 'sticky', top: 0, zIndex: 100 }}>
             <div className="container topbar">
                 <div className="brand">
                     <img
@@ -25,7 +25,7 @@ export default function Header() {
                         style={{ width: '50px', height: '50px', objectFit: 'contain' }}
                     />
                     <div>
-                        <div style={{ fontWeight: 700, fontSize: '25px' }}>Fatima Felippe</div>
+                        <div style={{ fontWeight: 900, fontSize: '25px' }}>Fatima Felippe</div>
                         <div style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>
                             Artigos, reflexões e notícias
                         </div>
@@ -43,12 +43,12 @@ export default function Header() {
                 </button>
 
                 <nav className={`main-nav ${menuOpen ? 'active' : ''}`} aria-label="menu">
-                    <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-                    <Link to="/artigos" onClick={() => setMenuOpen(false)}>Artigos</Link>
-                    <Link to="/reflexoes" onClick={() => setMenuOpen(false)}>Reflexões</Link>
-                    <Link to="/noticias" onClick={() => setMenuOpen(false)}>Notícias</Link>
-                    <Link to="/contato" onClick={() => setMenuOpen(false)}>Contato</Link>
-                    <Link to="/sobre" onClick={() => setMenuOpen(false)}>Sobre</Link>
+                    <NavLink to="/" end onClick={() => setMenuOpen(false)}>Home</NavLink>
+                    <NavLink to="/artigos" onClick={() => setMenuOpen(false)}>Artigos</NavLink>
+                    <NavLink to="/reflexoes" onClick={() => setMenuOpen(false)}>Reflexões</NavLink>
+                    <NavLink to="/noticias" onClick={() => setMenuOpen(false)}>Notícias</NavLink>
+                    <NavLink to="/contato" onClick={() => setMenuOpen(false)}>Contato</NavLink>
+                    <NavLink to="/sobre" onClick={() => setMenuOpen(false)}>Sobre</NavLink>
 
                     <form onSubmit={handleSearch} className="search">
                         <input

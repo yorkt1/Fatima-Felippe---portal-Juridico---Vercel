@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
@@ -55,9 +56,14 @@ export default function ReflexoesPage() {
                             <p>Carregando...</p>
                         ) : (
                             <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                                {reflexoes.slice(0, 5).map((reflexao) => (
+                                {reflexoes.slice(0, 3).map((reflexao) => (
                                     <li key={reflexao.id}>
-                                        <a href={`/reflexao/${reflexao.id}`}>{toTitleCase(reflexao.title)}</a>
+                                        <Link to={`/reflexao/${reflexao.id}`}>
+                                            <span className={`category ${reflexao.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                                {reflexao.categoryName.split(' ')[0]}
+                                            </span>{' '}
+                                            {toTitleCase(reflexao.title)}
+                                        </Link>
                                     </li>
                                 ))}
                             </ol>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
@@ -53,10 +54,10 @@ export default function ArtigosPage() {
                     <div className="widget">
                         <h4>Categorias</h4>
                         <div className="list-compact">
-                            <a href="#civil">Direito Civil</a>
-                            <a href="#tributario">Direito Tributário</a>
-                            <a href="#trabalho">Direito do Trabalho</a>
-                            <a href="#constitucional">Direito Constitucional</a>
+                            <Link to="/artigos">Direito Civil</Link>
+                            <Link to="/artigos">Direito Tributário</Link>
+                            <Link to="/artigos">Direito do Trabalho</Link>
+                            <Link to="/artigos">Direito Constitucional</Link>
                         </div>
                     </div>
 
@@ -66,9 +67,14 @@ export default function ArtigosPage() {
                             <p>Carregando...</p>
                         ) : (
                             <ol style={{ paddingLeft: '18px', margin: 0 }}>
-                                {articles.slice(0, 5).map((article) => (
+                                {articles.slice(0, 3).map((article) => (
                                     <li key={article.id}>
-                                        <a href={`/artigo/${article.id}`}>{toTitleCase(article.title)}</a>
+                                        <Link to={`/artigo/${article.id}`}>
+                                            <span className={`category ${article.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                                {article.categoryName.split(' ')[0]}
+                                            </span>{' '}
+                                            {toTitleCase(article.title)}
+                                        </Link>
                                     </li>
                                 ))}
                             </ol>

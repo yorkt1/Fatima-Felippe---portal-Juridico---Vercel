@@ -54,11 +54,11 @@ export default function ArticlePage() {
 
     return (
         <div className="container" style={{ padding: '20px 0' }}>
-            <div className="article-content" style={{ maxWidth: '800px', margin: '0 auto', background: 'white', padding: '30px', borderRadius: '12px', position: 'relative' }}>
+            <div className="article-content">
                 <button className="close-btn" onClick={() => navigate(-1)}>×</button>
 
                 <div className="article-header">
-                    <div className={`category ${article.category}`}>{article.categoryName}</div>
+                    <span className={`category ${article.category}`}>{article.categoryName}</span>
 
                     <div className="article-meta">
                         <div className="meta">
@@ -89,8 +89,8 @@ export default function ArticlePage() {
 
                 {article.audio_url && (
                     <div className="article-audio-player">
-                        <p>🎧 Áudio da Reflexão</p>
-                        <audio controls>
+                        <p><strong>🎧 Áudio da Reflexão</strong></p>
+                        <audio controls style={{ width: '100%', marginTop: '10px' }}>
                             <source src={article.audio_url} type="audio/mpeg" />
                             Seu navegador não suporta o elemento de áudio.
                         </audio>
