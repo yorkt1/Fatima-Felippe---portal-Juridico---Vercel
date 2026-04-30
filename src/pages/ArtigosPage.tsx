@@ -4,7 +4,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { toTitleCase } from '../utils/titleCase';
+
 
 export default function ArtigosPage() {
     const [articles, setArticles] = useState<Article[]>([]);
@@ -73,7 +73,7 @@ export default function ArtigosPage() {
                                             <span className={`category ${article.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
                                                 {article.categoryName.split(' ')[0]}
                                             </span>{' '}
-                                            {toTitleCase(article.title)}
+                                            {article.title}
                                         </Link>
                                     </li>
                                 ))}

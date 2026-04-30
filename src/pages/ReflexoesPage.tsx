@@ -4,7 +4,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { toTitleCase } from '../utils/titleCase';
+
 
 export default function ReflexoesPage() {
     const [reflexoes, setReflexoes] = useState<Article[]>([]);
@@ -62,7 +62,7 @@ export default function ReflexoesPage() {
                                             <span className={`category ${reflexao.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
                                                 {reflexao.categoryName.split(' ')[0]}
                                             </span>{' '}
-                                            {toTitleCase(reflexao.title)}
+                                            {reflexao.title}
                                         </Link>
                                     </li>
                                 ))}

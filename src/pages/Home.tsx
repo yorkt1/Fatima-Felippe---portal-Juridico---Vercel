@@ -4,7 +4,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import SkeletonCard from '../components/SkeletonCard';
 import ArticleCard from '../components/ArticleCard';
-import { toTitleCase } from '../utils/titleCase';
+
 
 // Hook que anima um número de 0 até `target` em `duration`ms
 function useCountUp(target: number, duration = 800) {
@@ -262,7 +262,7 @@ export default function Home() {
                                     />
                                 </Link>
                                 <Link to={`/artigo/${leadArticle.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                    <h2 style={{ margin: '12px 0 6px', fontSize: '22px' }}>{toTitleCase(leadArticle.title)}</h2>
+                                    <h2 style={{ margin: '12px 0 6px', fontSize: '22px' }}>{leadArticle.title}</h2>
                                 </Link>
                                 <p style={{ color: 'var(--muted)', fontSize: '14px' }}>{leadArticle.excerpt}</p>
                                 <div style={{ marginTop: '12px' }}>
@@ -289,7 +289,7 @@ export default function Home() {
                                                 e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                                             }}
                                         />
-                                        <h4 style={{ margin: '10px 0 6px', fontSize: '15px' }}>{toTitleCase(post.title)}</h4>
+                                        <h4 style={{ margin: '10px 0 6px', fontSize: '15px' }}>{post.title}</h4>
                                         <div className="meta">por {post.author || 'Redação'} • {post.date}</div>
                                     </Link>
                                 ))}
@@ -325,7 +325,7 @@ export default function Home() {
                                     <li key={post.id}>
                                         <Link to={`/artigo/${post.id}`}>
                                             <span className={`category ${post.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{post.categoryName.split(' ')[0]}</span>{' '}
-                                            {toTitleCase(post.title)}
+                                            {post.title}
                                         </Link>
                                     </li>
                                 ))}
@@ -363,7 +363,7 @@ export default function Home() {
                                     <li key={reflexao.id}>
                                         <Link to={`/reflexao/${reflexao.id}`}>
                                             <span className={`category ${reflexao.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{reflexao.categoryName.split(' ')[0]}</span>{' '}
-                                            {toTitleCase(reflexao.title)}
+                                            {reflexao.title}
                                         </Link>
                                     </li>
                                 ))}
@@ -405,7 +405,7 @@ export default function Home() {
                                     <li key={noticia.id}>
                                         <Link to={`/noticia/${noticia.id}`}>
                                             <span className={`category ${noticia.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{noticia.categoryName.split(' ')[0]}</span>{' '}
-                                            {toTitleCase(noticia.title)}
+                                            {noticia.title}
                                         </Link>
                                     </li>
                                 ))}

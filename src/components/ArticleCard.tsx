@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Article } from '../data/content';
-import { toTitleCase } from '../utils/titleCase';
+
 
 interface ArticleCardProps {
     article: Article;
@@ -26,7 +26,7 @@ export default function ArticleCard({ article, linkPrefix }: ArticleCardProps) {
                     />
                 </Link>
                 <h3>
-                    <Link to={`/${prefix}/${article.id}`}>{toTitleCase(article.title)}</Link>
+                    <Link to={`/${prefix}/${article.id}`}>{article.title}</Link>
                 </h3>
                 <p className="excerpt">{article.excerpt}</p>
             </div>
