@@ -254,7 +254,10 @@ nav.main-nav a.active {
     background: var(--card);
     padding: 14px;
     border-radius: 10px;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
+
 
 .post img {
     width: 160px;
@@ -290,7 +293,9 @@ aside .widget {
     background: var(--card);
     padding: 14px;
     border-radius: 10px;
-    margin-bottom: 12px
+    margin-bottom: 12px;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .widget h4 {
