@@ -139,8 +139,7 @@ nav.main-nav a.active {
     font-size: 12px;
     font-weight: 600;
     padding: 4px 10px;
-    border-radius: 20px;
-    text-transform: uppercase;
+    border-radius: 4px;
     display: inline-block;
     margin-bottom: 8px;
     word-break: break-word;
