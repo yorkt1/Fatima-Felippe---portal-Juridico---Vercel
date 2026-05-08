@@ -4,14 +4,19 @@ import { useNavigate } from 'react-router-dom';
 export default function AdminLoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (password === 'Fatimaadv132!@#') {
+            const expirationHours = rememberMe ? 24 * 7 : 1; // 7 days or 1 hour
+            const expirationTime = new Date().getTime() + expirationHours * 60 * 60 * 1000;
+            
             // Save authentication state
             localStorage.setItem('adminAuthenticated', 'true');
+            localStorage.setItem('adminLoginExpiration', expirationTime.toString());
             navigate('/admin');
         } else {
             setError('Código de acesso incorreto');
@@ -47,6 +52,19 @@ export default function AdminLoginPage() {
                             placeholder="Digite o código..."
                             className="admin-login-input"
                         />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                            type="checkbox"
+                            id="remember"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        <label htmlFor="remember" style={{ fontSize: '0.875rem', color: '#4b5563', cursor: 'pointer' }}>
+                            Manter-me conectado por 7 dias
+                        </label>
                     </div>
 
                     {error && (

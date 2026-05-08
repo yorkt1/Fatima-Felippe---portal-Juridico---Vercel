@@ -23,7 +23,12 @@ export default function AdminPage() {
 
     useEffect(() => {
         const isAuthenticated = localStorage.getItem('adminAuthenticated');
-        if (isAuthenticated !== 'true') {
+        const expiration = localStorage.getItem('adminLoginExpiration');
+        const now = new Date().getTime();
+
+        if (isAuthenticated !== 'true' || !expiration || now > parseInt(expiration)) {
+            localStorage.removeItem('adminAuthenticated');
+            localStorage.removeItem('adminLoginExpiration');
             navigate('/admin-login');
         }
     }, [navigate]);
