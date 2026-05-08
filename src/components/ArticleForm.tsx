@@ -16,6 +16,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import FontFamily from '@tiptap/extension-font-family';
 import { Extension } from '@tiptap/core';
+import type { CommandProps } from '@tiptap/core';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import { Upload } from 'lucide-react';
@@ -54,6 +55,201 @@ const TabIndent = Extension.create({
                     '<span style="display:inline-block;width:2em"> </span>'
                 ),
         };
+    },
+});
+
+// Extensão de Indentação (aumentar/diminuir recuo via margin-left)
+const Indent = Extension.create({
+    name: 'indent',
+    addGlobalAttributes() {
+        return [
+            {
+                types: ['paragraph', 'heading'],
+                attributes: {
+                    indent: {
+                        default: 0,
+                        parseHTML: element => {
+                            const ml = element.style.marginLeft;
+                            if (!ml) return 0;
+                            return parseInt(ml) / 40 || 0;
+                        },
+                        renderHTML: attributes => {
+                            if (!attributes.indent || attributes.indent === 0) return {};
+                            return { style: `margin-left: ${attributes.indent * 40}px` };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            increaseIndent: () => ({ tr, state, dispatch }: CommandProps) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node, pos) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        const indent = (node.attrs.indent || 0) + 1;
+                        if (dispatch) {
+                            tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+            decreaseIndent: () => ({ tr, state, dispatch }: CommandProps) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node, pos) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        const indent = Math.max(0, (node.attrs.indent || 0) - 1);
+                        if (dispatch) {
+                            tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+        } as any;
+    },
+});
+
+const LineHeight = Extension.create({
+    name: 'lineHeight',
+    addGlobalAttributes() {
+        return [
+            {
+                types: ['paragraph', 'heading'],
+                attributes: {
+                    lineHeight: {
+                        default: null,
+                        parseHTML: element => element.style.lineHeight || null,
+                        renderHTML: attributes => {
+                            if (!attributes.lineHeight) return {};
+                            return { style: `line-height: ${attributes.lineHeight} !important` };
+                        },
+                    },
+                    marginTop: {
+                        default: null,
+                        parseHTML: element => element.style.marginTop || null,
+                        renderHTML: attributes => {
+                            if (!attributes.marginTop) return {};
+                            return { style: `margin-top: ${attributes.marginTop} !important` };
+                        },
+                    },
+                    marginBottom: {
+                        default: null,
+                        parseHTML: element => element.style.marginBottom || null,
+                        renderHTML: attributes => {
+                            if (!attributes.marginBottom) return {};
+                            return { style: `margin-bottom: ${attributes.marginBottom} !important` };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            setLineHeight: (lineHeight: string) => ({ tr, state, dispatch }: any) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        if (node.attrs.lineHeight !== lineHeight) {
+                            if (dispatch) {
+                                tr.setNodeMarkup(pos, undefined, { ...node.attrs, lineHeight });
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+            unsetLineHeight: () => ({ tr, state, dispatch }: any) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        if (node.attrs.lineHeight) {
+                            if (dispatch) {
+                                const attrs = { ...node.attrs };
+                                delete attrs.lineHeight;
+                                tr.setNodeMarkup(pos, undefined, attrs);
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+            setMarginTop: (marginTop: string) => ({ tr, state, dispatch }: any) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        if (node.attrs.marginTop !== marginTop) {
+                            if (dispatch) {
+                                tr.setNodeMarkup(pos, undefined, { ...node.attrs, marginTop });
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+            unsetMarginTop: () => ({ tr, state, dispatch }: any) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        if (node.attrs.marginTop) {
+                            if (dispatch) {
+                                const attrs = { ...node.attrs };
+                                delete attrs.marginTop;
+                                tr.setNodeMarkup(pos, undefined, attrs);
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+            setMarginBottom: (marginBottom: string) => ({ tr, state, dispatch }: any) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        if (node.attrs.marginBottom !== marginBottom) {
+                            if (dispatch) {
+                                tr.setNodeMarkup(pos, undefined, { ...node.attrs, marginBottom });
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+            unsetMarginBottom: () => ({ tr, state, dispatch }: any) => {
+                const { from, to } = state.selection;
+                let changed = false;
+                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                        if (node.attrs.marginBottom) {
+                            if (dispatch) {
+                                const attrs = { ...node.attrs };
+                                delete attrs.marginBottom;
+                                tr.setNodeMarkup(pos, undefined, attrs);
+                            }
+                            changed = true;
+                        }
+                    }
+                });
+                return changed;
+            },
+        } as any;
     },
 });
 
@@ -138,6 +334,14 @@ const FONT_FAMILIES = [
     { label: 'Courier New', value: 'Courier New' },
 ];
 
+const LINE_HEIGHTS = [
+    { label: 'Simples', value: '1' },
+    { label: '1.15', value: '1.15' },
+    { label: '1.5', value: '1.5' },
+    { label: 'Duplo', value: '2' },
+    { label: '2.5', value: '2.5' },
+];
+
 export default function ArticleForm({ type, initialData, onCancel, onSuccess }: ArticleFormProps) {
     const [loading, setLoading] = useState(false);
     const [audioUploading, setAudioUploading] = useState(false);
@@ -148,12 +352,16 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
     const [showTableInput, setShowTableInput] = useState(false);
     const [showTextColorPalette, setShowTextColorPalette] = useState(false);
     const [showBgColorPalette, setShowBgColorPalette] = useState(false);
+    const [showLineHeightMenu, setShowLineHeightMenu] = useState(false);
     const [currentTextColor, setCurrentTextColor] = useState('#111111');
     const [currentBgColor, setCurrentBgColor] = useState('#ffff00');
     const textColorRef = useRef<HTMLInputElement>(null);
     const bgColorRef = useRef<HTMLInputElement>(null);
     const docxInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
+    const prevLineHeightRef = useRef<string | null>(null);
+    // Salva a seleção do editor antes de abrir o dropdown (evita perda de foco)
+    const savedSelectionRef = useRef<any>(null);
 
     const [formData, setFormData] = useState<Partial<Article>>(initialData || {
         title: '',
@@ -183,6 +391,8 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             Superscript,
             Highlight.configure({ multicolor: true }),
             FontFamily,
+            LineHeight,
+            Indent,
             Link.configure({
                 openOnClick: false,
                 HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' },
@@ -194,7 +404,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             TableCell,
             TabIndent,
         ],
-        content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' '),
+        content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/ /g, ' '),
         onUpdate: ({ editor }) => {
             setFormData(prev => ({ ...prev, content: editor.getHTML() }));
         },
@@ -265,7 +475,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
             if (editor) {
                 // Insere no editor preservando HTML Rico, sem &nbsp; do Word
-                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
+                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/ /g, ' ');
                 editor.commands.setContent(cleanedContent);
             }
             alert("Documento Word importado com sucesso!");
@@ -682,16 +892,156 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                 <div className="doc-sep" />
 
                                 {/* Alinhamento */}
-                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'left' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('left').run()} title="Esquerda">⬡←</button>
-                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'center' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('center').run()} title="Centro">⬡</button>
-                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'right' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('right').run()} title="Direita">→⬡</button>
-                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'justify' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('justify').run()} title="Justificar">☰</button>
+                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'left' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('left').run()} title="Alinhar à esquerda (Ctrl+L)" style={{ fontSize: 15 }}>≡←</button>
+                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'center' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('center').run()} title="Centralizar (Ctrl+E)" style={{ fontSize: 15 }}>≡</button>
+                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'right' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('right').run()} title="Alinhar à direita (Ctrl+R)" style={{ fontSize: 15 }}>→≡</button>
+                                <button type="button" className={`doc-btn${editor?.isActive({ textAlign: 'justify' }) ? ' active' : ''}`} onClick={() => editor?.chain().focus().setTextAlign('justify').run()} title="Justificar (Ctrl+J)" style={{ fontSize: 15 }}>☰</button>
+
+                                <div className="doc-sep" />
+
+                                {/* Indentação */}
+                                <button type="button" className="doc-btn" onClick={() => (editor?.chain().focus() as any).decreaseIndent().run()} title="Diminuir recuo" style={{ fontSize: 14 }}>⇤</button>
+                                <button type="button" className="doc-btn" onClick={() => (editor?.chain().focus() as any).increaseIndent().run()} title="Aumentar recuo" style={{ fontSize: 14 }}>⇥</button>
+
+                                <div className="doc-sep" />
+
+                                {/* ── ESPAÇAMENTO DE PARÁGRAFO ── */}
+                                <div className="doc-color-picker-wrap" title="Espaçamento entre linhas">
+                                    <button
+                                        type="button"
+                                        className={`doc-btn doc-lineh-trigger${showLineHeightMenu ? ' active' : ''}`}
+                                        onMouseDown={(e) => {
+                                            e.preventDefault(); 
+                                            if (!editor) return;
+                                            savedSelectionRef.current = editor.state.selection;
+                                            prevLineHeightRef.current = editor.getAttributes('paragraph').lineHeight ?? null;
+                                            (window as any).isLineHeightConfirmed = false;
+                                            setShowLineHeightMenu(v => !v);
+                                            setShowTextColorPalette(false);
+                                            setShowBgColorPalette(false);
+                                        }}
+                                        title="Espaçamento entre linhas do parágrafo"
+                                    >
+                                        <span style={{ fontSize: 14 }}>↕</span>
+                                        <span style={{ fontSize: 10, color: '#2563eb', fontWeight: 600, marginLeft: 2 }}>
+                                            {editor?.getAttributes('paragraph').lineHeight || '—'}
+                                        </span>
+                                        <span style={{ fontSize: 9, color: '#94a3b8', marginLeft: 1 }}>▼</span>
+                                    </button>
+                                    {showLineHeightMenu && (
+                                        <div className="doc-lineh-menu">
+                                            <div className="doc-palette-label">↕ Espaçamento entre Linhas</div>
+                                            {LINE_HEIGHTS.map(lh => {
+                                                const isActive = editor?.isActive('paragraph', { lineHeight: lh.value }) || editor?.isActive('heading', { lineHeight: lh.value });
+                                                return (
+                                                    <button
+                                                        key={lh.value}
+                                                        type="button"
+                                                        className="doc-lineh-option"
+                                                        style={{
+                                                            fontWeight: isActive ? 700 : 400,
+                                                            color: isActive ? '#2563eb' : '#334155',
+                                                            background: isActive ? '#eff6ff' : 'transparent',
+                                                        }}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            if (!editor) return;
+                                                            (window as any).isLineHeightConfirmed = true;
+                                                            const sel = savedSelectionRef.current;
+                                                            editor.view.dispatch(editor.state.tr.setSelection(sel));
+                                                            (editor.chain().focus() as any).setLineHeight(lh.value).run();
+                                                            setShowLineHeightMenu(false);
+                                                        }}
+                                                    >
+                                                        <span className="doc-lineh-preview" style={{ '--lh': lh.value } as React.CSSProperties}>
+                                                            <span /><span /><span />
+                                                        </span>
+                                                        <span style={{ flex: 1 }}>{lh.label}</span>
+                                                        {isActive && <span style={{ color: '#2563eb', fontSize: 12 }}>✓</span>}
+                                                    </button>
+                                                );
+                                            })}
+                                            <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 6 }}>
+                                                {(() => {
+                                                    const hasMarginTop = editor?.getAttributes('paragraph').marginTop || editor?.getAttributes('heading').marginTop;
+                                                    const hasMarginBottom = editor?.getAttributes('paragraph').marginBottom || editor?.getAttributes('heading').marginBottom;
+                                                    const isSpaceAfterRemoved = hasMarginBottom === '0pt' || hasMarginBottom === '0px' || hasMarginBottom === '0';
+                                                    
+                                                    return (
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                className="doc-lineh-option"
+                                                                style={{ color: '#334155', fontSize: 12 }}
+                                                                onMouseDown={(e) => {
+                                                                    e.preventDefault();
+                                                                    if (!editor) return;
+                                                                    (window as any).isLineHeightConfirmed = true;
+                                                                    const sel = savedSelectionRef.current;
+                                                                    editor.view.dispatch(editor.state.tr.setSelection(sel));
+                                                                    if (hasMarginTop) {
+                                                                        (editor.chain().focus() as any).unsetMarginTop().run();
+                                                                    } else {
+                                                                        (editor.chain().focus() as any).setMarginTop('12pt').run();
+                                                                    }
+                                                                    setShowLineHeightMenu(false);
+                                                                }}
+                                                            >
+                                                                <span style={{ marginRight: 6 }}>{hasMarginTop ? '↓' : '↑'}</span> 
+                                                                {hasMarginTop ? 'Remover espaço antes do parágrafo' : 'Adicionar espaço antes do parágrafo'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="doc-lineh-option"
+                                                                style={{ color: '#334155', fontSize: 12 }}
+                                                                onMouseDown={(e) => {
+                                                                    e.preventDefault();
+                                                                    if (!editor) return;
+                                                                    (window as any).isLineHeightConfirmed = true;
+                                                                    const sel = savedSelectionRef.current;
+                                                                    editor.view.dispatch(editor.state.tr.setSelection(sel));
+                                                                    if (isSpaceAfterRemoved) {
+                                                                        (editor.chain().focus() as any).unsetMarginBottom().run();
+                                                                    } else {
+                                                                        (editor.chain().focus() as any).setMarginBottom('0pt').run();
+                                                                    }
+                                                                    setShowLineHeightMenu(false);
+                                                                }}
+                                                            >
+                                                                <span style={{ marginRight: 6 }}>{isSpaceAfterRemoved ? '↓' : '↑'}</span> 
+                                                                {isSpaceAfterRemoved ? 'Adicionar espaço depois do parágrafo' : 'Remover espaço depois do parágrafo'}
+                                                            </button>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                            <div style={{ borderTop: '1px solid #e2e8f0', marginTop: 6, paddingTop: 6 }}>
+                                                <button
+                                                    type="button"
+                                                    className="doc-lineh-option"
+                                                    style={{ color: '#64748b', fontSize: 12 }}
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        if (!editor) return;
+                                                        (window as any).isLineHeightConfirmed = true;
+                                                        const sel = savedSelectionRef.current;
+                                                        editor.view.dispatch(editor.state.tr.setSelection(sel));
+                                                        (editor.chain().focus() as any).unsetLineHeight().unsetMarginTop().unsetMarginBottom().run();
+                                                        setShowLineHeightMenu(false);
+                                                    }}
+                                                >
+                                                    <span style={{ marginRight: 6 }}>↺</span> Restaurar padrão
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
                                 <div className="doc-sep" />
 
                                 {/* Listas */}
-                                <button type="button" className={`doc-btn${editor?.isActive('bulletList') ? ' active' : ''}`} onClick={() => editor?.chain().focus().toggleBulletList().run()} title="Lista">• ≡</button>
-                                <button type="button" className={`doc-btn${editor?.isActive('orderedList') ? ' active' : ''}`} onClick={() => editor?.chain().focus().toggleOrderedList().run()} title="Lista Numerada">1.≡</button>
+                                <button type="button" className={`doc-btn${editor?.isActive('bulletList') ? ' active' : ''}`} onClick={() => editor?.chain().focus().toggleBulletList().run()} title="Lista com marcadores">• ≡</button>
+                                <button type="button" className={`doc-btn${editor?.isActive('orderedList') ? ' active' : ''}`} onClick={() => editor?.chain().focus().toggleOrderedList().run()} title="Lista numerada">1. ≡</button>
 
                                 <div className="doc-sep" />
 
@@ -733,7 +1083,34 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
                                 <button type="button" className="doc-btn" onClick={() => editor?.chain().focus().undo().run()} title="Desfazer (Ctrl+Z)">↩</button>
                                 <button type="button" className="doc-btn" onClick={() => editor?.chain().focus().redo().run()} title="Refazer (Ctrl+Y)">↪</button>
-                                <button type="button" className="doc-btn" onClick={() => editor?.chain().focus().clearNodes().unsetAllMarks().run()} title="Limpar formatação" style={{ color: '#6b7280' }}>✗</button>
+                                <button
+                                    type="button"
+                                    className="doc-btn"
+                                    title="Limpar toda formatação (texto, parágrafo, recuo)"
+                                    style={{ color: '#6b7280', fontSize: 12, gap: 3 }}
+                                    onClick={() => {
+                                        if (!editor) return;
+                                        (editor.chain().focus() as any)
+                                            .clearNodes()
+                                            .unsetAllMarks()
+                                            .unsetLineHeight()
+                                            .run();
+                                        // Limpa também indent via tr direto
+                                        const { state, dispatch } = editor.view;
+                                        const tr = state.tr;
+                                        state.doc.descendants((node, pos) => {
+                                            if (node.type.name === 'paragraph' || node.type.name === 'heading') {
+                                                const attrs = { ...node.attrs };
+                                                delete attrs.lineHeight;
+                                                attrs.indent = 0;
+                                                tr.setNodeMarkup(pos, undefined, attrs);
+                                            }
+                                        });
+                                        dispatch(tr);
+                                    }}
+                                >
+                                    ✗ <span style={{ fontSize: 10 }}>Limpar</span>
+                                </button>
 
                                 <div className="doc-sep" />
 
@@ -784,7 +1161,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                         </div>
 
                         {/* ── CANVAS DO DOCUMENTO (FOLHA A4) ── */}
-                        <div className="doc-canvas" onClick={() => { setShowTextColorPalette(false); setShowBgColorPalette(false); }}>
+                        <div className="doc-canvas" onClick={() => { setShowTextColorPalette(false); setShowBgColorPalette(false); setShowLineHeightMenu(false); }}>
                             <div className="doc-page">
                                 <EditorContent editor={editor} className="doc-editor-body" />
                             </div>
@@ -1062,7 +1439,6 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                     min-height: 900px;
                     font-family: 'Calibri', 'Georgia', 'Times New Roman', serif;
                     font-size: 12pt;
-                    line-height: 1.6;
                     color: #1a1a1a;
                     word-break: break-word;
                     hyphens: auto;
@@ -1071,7 +1447,6 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                 /* Parágrafos */
                 .doc-editor-body .ProseMirror p {
                     margin: 0 0 0.6em 0;
-                    line-height: 1.6;
                 }
 
                 /* Títulos estilo documento */
@@ -1210,6 +1585,64 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                     float: left;
                     height: 0;
                     font-style: italic;
+                }
+
+                /* ── Menu de espaçamento de parágrafo ── */
+                .doc-lineh-trigger {
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 3px;
+                    padding: 0 8px;
+                    height: 28px;
+                    min-width: 52px;
+                    border: 1px solid #e2e8f0 !important;
+                    border-radius: 5px !important;
+                    background: white !important;
+                }
+                .doc-lineh-trigger:hover { background: #f1f5f9 !important; }
+                .doc-lineh-trigger.active { border-color: #93c5fd !important; background: #eff6ff !important; }
+                .doc-lineh-menu {
+                    position: absolute;
+                    top: calc(100% + 4px);
+                    left: 0;
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+                    padding: 8px;
+                    z-index: 300;
+                    min-width: 210px;
+                }
+                .doc-lineh-option {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    width: 100%;
+                    padding: 7px 10px;
+                    border: none;
+                    border-radius: 6px;
+                    background: transparent;
+                    cursor: pointer;
+                    font-size: 13px;
+                    text-align: left;
+                    transition: background 0.1s;
+                }
+                .doc-lineh-option:hover { background: #f1f5f9; }
+
+                /* Preview visual de espaçamento (3 barrinhas) */
+                .doc-lineh-preview {
+                    display: inline-flex;
+                    flex-direction: column;
+                    gap: calc(var(--lh, 1.5) * 3px);
+                    width: 22px;
+                    flex-shrink: 0;
+                }
+                .doc-lineh-preview span {
+                    display: block;
+                    height: 2px;
+                    background: currentColor;
+                    border-radius: 1px;
+                    opacity: 0.7;
                 }
 
                 /* Regua no topo da página (decorativa) */
