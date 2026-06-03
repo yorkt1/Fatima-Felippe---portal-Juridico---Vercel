@@ -85,7 +85,7 @@ export default function NoticiaPage() {
                     )}
                 </div>
 
-                <img src={noticia.image} alt={noticia.title} className="article-hero-img" />
+                <img src={noticia.image} alt={noticia.title} className="article-hero-img" style={{ objectPosition: noticia.image_position || '50% 50%' }} />
 
                 {noticia.audio_url && (
                     <div className="article-audio-player">

@@ -8,6 +8,7 @@ export interface Article {
   title: string;
   excerpt: string;
   image: string;
+  image_position?: string; // ponto focal do recorte nos cards, ex: "50% 30%"
   author: string;
   tags?: string[];
   content: string;

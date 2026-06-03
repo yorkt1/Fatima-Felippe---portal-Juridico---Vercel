@@ -22,16 +22,23 @@ export default function AdminPage() {
     const { showToast, ToastComponent } = useToast();
 
     useEffect(() => {
-        const isAuthenticated = localStorage.getItem('adminAuthenticated');
-        const expiration = localStorage.getItem('adminLoginExpiration');
-        const now = new Date().getTime();
+        // Verifica a sessão atual do Supabase Auth
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) navigate('/admin-login');
+        });
 
-        if (isAuthenticated !== 'true' || !expiration || now > parseInt(expiration)) {
-            localStorage.removeItem('adminAuthenticated');
-            localStorage.removeItem('adminLoginExpiration');
-            navigate('/admin-login');
-        }
+        // Reage a logout / expiração de token em tempo real
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!session) navigate('/admin-login');
+        });
+
+        return () => subscription.unsubscribe();
     }, [navigate]);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        navigate('/admin-login');
+    };
 
     const fetchContent = useCallback(async () => {
         setLoading(true);
@@ -276,7 +283,17 @@ export default function AdminPage() {
                 onCancel={() => setDeleteModal({ isOpen: false, id: null })}
             />
 
-            <h1 style={{ marginBottom: '30px', textAlign: 'center' }}>Painel Administrativo</h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginBottom: '30px' }}>
+                <h1 style={{ margin: 0, textAlign: 'center' }}>Painel Administrativo</h1>
+                <button
+                    className="btn"
+                    onClick={handleLogout}
+                    title="Sair da área administrativa"
+                    style={{ position: 'absolute', right: 0, color: '#dc2626' }}
+                >
+                    Sair
+                </button>
+            </div>
 
             {/* Tabs */}
             <div className="admin-tabs">
@@ -352,6 +369,7 @@ export default function AdminPage() {
                                         width: '100px',
                                         height: '70px',
                                         objectFit: 'cover',
+                                        objectPosition: item.image_position || '50% 50%',
                                         borderRadius: '6px'
                                     }}
                                 />

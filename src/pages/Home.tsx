@@ -255,6 +255,7 @@ export default function Home() {
                                     <img
                                         src={leadArticle.image}
                                         alt={leadArticle.title}
+                                        style={{ objectPosition: leadArticle.image_position || '50% 50%' }}
                                         onError={(e) => {
                                             e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                                             e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
@@ -284,7 +285,8 @@ export default function Home() {
                                             src={post.image}
                                             loading="lazy"
                                             alt={post.title}
-                                            onError={(e) => { 
+                                            style={{ objectPosition: post.image_position || '50% 50%' }}
+                                            onError={(e) => {
                                                 e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                                                 e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                                             }}

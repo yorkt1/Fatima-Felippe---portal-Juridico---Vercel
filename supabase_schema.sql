@@ -16,23 +16,24 @@ create table public.contents (
 );
 
 -- Set up Row Level Security (RLS)
--- For development, we can allow public read/write.
+-- Leitura pública; escrita apenas para usuários autenticados (Supabase Auth).
+-- Veja supabase_auth_rls.sql para detalhes e criação do usuário admin.
 alter table public.contents enable row level security;
 
-create policy "Enable read access for all users"
+create policy "Public read access"
 on public.contents for select
 using (true);
 
-create policy "Enable insert for all users"
-on public.contents for insert
+create policy "Authenticated insert"
+on public.contents for insert to authenticated
 with check (true);
 
-create policy "Enable update for all users"
-on public.contents for update
-using (true);
+create policy "Authenticated update"
+on public.contents for update to authenticated
+using (true) with check (true);
 
-create policy "Enable delete for all users"
-on public.contents for delete
+create policy "Authenticated delete"
+on public.contents for delete to authenticated
 using (true);
 
 -- Insert initial data (from content.ts)

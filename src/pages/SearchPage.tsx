@@ -162,6 +162,7 @@ export default function SearchPage() {
                 <img
                     src={item.image}
                     alt={item.title}
+                    style={{ objectPosition: item.image_position || '50% 50%' }}
                     onError={(e) => {
                         e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                     }}

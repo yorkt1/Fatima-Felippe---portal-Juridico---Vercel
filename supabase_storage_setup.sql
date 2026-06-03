@@ -10,20 +10,20 @@ drop policy if exists "Allow Updates" on storage.objects;
 drop policy if exists "Allow Deletes" on storage.objects;
 
 -- 3. Allow public access to view images (SELECT)
-create policy "Public Access"
+create policy "Public read content-images"
   on storage.objects for select
   using ( bucket_id = 'content-images' );
 
--- 4. Allow uploads (INSERT)
-create policy "Allow Uploads"
-  on storage.objects for insert
+-- 4. Uploads apenas para usuários autenticados (admin logado)
+create policy "Authenticated upload content-images"
+  on storage.objects for insert to authenticated
   with check ( bucket_id = 'content-images' );
 
--- 5. Allow updates/deletes
-create policy "Allow Updates"
-  on storage.objects for update
+-- 5. Alterar/remover apenas para usuários autenticados
+create policy "Authenticated update content-images"
+  on storage.objects for update to authenticated
   using ( bucket_id = 'content-images' );
 
-create policy "Allow Deletes"
-  on storage.objects for delete
+create policy "Authenticated delete content-images"
+  on storage.objects for delete to authenticated
   using ( bucket_id = 'content-images' );

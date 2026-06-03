@@ -369,6 +369,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
         categoryName: '',
         excerpt: '',
         image: '',
+        image_position: '50% 50%',
         author: 'Fátima T. Felippe',
         content: '',
         date: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
@@ -650,9 +651,50 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                     </div>
                     {formData.image && (
                         <div className="image-preview-wrapper">
-                            <span className="image-preview-label">Pré-visualização</span>
-                            <img src={formData.image} alt="Preview"
-                                style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', display: 'block' }} />
+                            <span className="image-preview-label">
+                                Ponto focal — clique na imagem para escolher o que aparece recortado nos cards
+                            </span>
+                            <div
+                                style={{ position: 'relative', cursor: 'crosshair', display: 'inline-block', maxWidth: '100%', lineHeight: 0 }}
+                                onClick={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+                                    const x = clamp(((e.clientX - rect.left) / rect.width) * 100);
+                                    const y = clamp(((e.clientY - rect.top) / rect.height) * 100);
+                                    setFormData(prev => ({ ...prev, image_position: `${x}% ${y}%` }));
+                                }}
+                            >
+                                <img src={formData.image} alt="Preview"
+                                    style={{ maxHeight: '320px', maxWidth: '100%', width: 'auto', height: 'auto', display: 'block' }} />
+                                {/* Marcador do ponto focal escolhido */}
+                                <span style={{
+                                    position: 'absolute',
+                                    left: (formData.image_position || '50% 50%').split(' ')[0],
+                                    top: (formData.image_position || '50% 50%').split(' ')[1],
+                                    transform: 'translate(-50%, -50%)',
+                                    width: 22, height: 22, borderRadius: '50%',
+                                    border: '3px solid #2563eb',
+                                    boxShadow: '0 0 0 2px white, 0 1px 4px rgba(0,0,0,0.4)',
+                                    background: 'rgba(37,99,235,0.25)',
+                                    pointerEvents: 'none',
+                                }} />
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', fontSize: '13px', color: '#6b7280' }}>
+                                <span>Posição: <strong>{formData.image_position || '50% 50%'}</strong></span>
+                                <button type="button" className="btn"
+                                    onClick={() => setFormData(prev => ({ ...prev, image_position: '50% 50%' }))}
+                                    style={{ padding: '4px 10px', fontSize: '12px' }}>
+                                    Centralizar
+                                </button>
+                            </div>
+                            {/* Mini pré-visualização do recorte do card */}
+                            <div style={{ marginTop: '10px' }}>
+                                <span style={{ fontSize: '12px', color: '#9ca3af' }}>Como ficará no card:</span>
+                                <div style={{ width: '240px', height: '150px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb', marginTop: '4px' }}>
+                                    <img src={formData.image} alt="Card preview"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: formData.image_position || '50% 50%', display: 'block' }} />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

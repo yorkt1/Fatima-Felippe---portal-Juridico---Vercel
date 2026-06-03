@@ -85,7 +85,7 @@ export default function ReflexaoPage() {
                     )}
                 </div>
 
-                <img src={reflexao.image} alt={reflexao.title} className="article-hero-img" />
+                <img src={reflexao.image} alt={reflexao.title} className="article-hero-img" style={{ objectPosition: reflexao.image_position || '50% 50%' }} />
 
                 {reflexao.audio_url && (
                     <div className="article-audio-player">

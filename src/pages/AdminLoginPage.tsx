@@ -1,26 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../services/supabase';
+
+// E-mail fixo do administrador. A tela pede só a senha; este e-mail é usado
+// internamente para autenticar no Supabase Auth.
+// IMPORTANTE: crie no painel do Supabase (Authentication > Users) um usuário
+// com EXATAMENTE este e-mail e a senha desejada.
+const ADMIN_EMAIL = 'admin@fatimafelippe.com.br';
 
 export default function AdminLoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
 
-        if (password === 'Fatimaadv132!@#') {
-            const expirationHours = rememberMe ? 24 * 7 : 1; // 7 days or 1 hour
-            const expirationTime = new Date().getTime() + expirationHours * 60 * 60 * 1000;
-            
-            // Save authentication state
-            localStorage.setItem('adminAuthenticated', 'true');
-            localStorage.setItem('adminLoginExpiration', expirationTime.toString());
-            navigate('/admin');
-        } else {
-            setError('Código de acesso incorreto');
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: ADMIN_EMAIL,
+            password,
+        });
+
+        setLoading(false);
+
+        if (signInError) {
+            setError('Senha incorreta');
             setPassword('');
+        } else {
+            navigate('/admin');
         }
     };
 
@@ -42,29 +52,18 @@ export default function AdminLoginPage() {
                                 color: '#4b5563'
                             }}
                         >
-                            Código de Acesso
+                            Senha de Acesso
                         </label>
                         <input
                             id="code"
                             type="password"
+                            autoComplete="current-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Digite o código..."
+                            placeholder="Digite a senha..."
                             className="admin-login-input"
+                            autoFocus
                         />
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input
-                            type="checkbox"
-                            id="remember"
-                            checked={rememberMe}
-                            onChange={(e) => setRememberMe(e.target.checked)}
-                            style={{ cursor: 'pointer' }}
-                        />
-                        <label htmlFor="remember" style={{ fontSize: '0.875rem', color: '#4b5563', cursor: 'pointer' }}>
-                            Manter-me conectado por 7 dias
-                        </label>
                     </div>
 
                     {error && (
@@ -83,15 +82,17 @@ export default function AdminLoginPage() {
                     <button
                         type="submit"
                         className="btn primary"
+                        disabled={loading}
                         style={{
                             width: '100%',
                             padding: '12px',
                             fontSize: '1rem',
                             marginTop: '8px',
-                            cursor: 'pointer'
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.7 : 1
                         }}
                     >
-                        Entrar
+                        {loading ? 'Entrando...' : 'Entrar'}
                     </button>
 
                     <button

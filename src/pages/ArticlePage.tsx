@@ -85,7 +85,7 @@ export default function ArticlePage() {
                     )}
                 </div>
 
-                <img src={article.image} alt={article.title} className="article-hero-img" />
+                <img src={article.image} alt={article.title} className="article-hero-img" style={{ objectPosition: article.image_position || '50% 50%' }} />
 
                 {article.audio_url && (
                     <div className="article-audio-player">
