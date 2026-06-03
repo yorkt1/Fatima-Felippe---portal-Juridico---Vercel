@@ -650,12 +650,12 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                         </div>
                     </div>
                     {formData.image && (
-                        <div className="image-preview-wrapper">
-                            <span className="image-preview-label">
-                                Ponto focal — clique na imagem para escolher o que aparece recortado nos cards
+                        <div style={{ marginTop: '10px', padding: '14px', border: '1px solid #e5e7eb', borderRadius: '10px', background: '#fafafa' }}>
+                            <span style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#374151' }}>
+                                🎯 Ponto focal — clique na imagem para escolher o que aparece recortado nos cards
                             </span>
                             <div
-                                style={{ position: 'relative', cursor: 'crosshair', display: 'inline-block', maxWidth: '100%', lineHeight: 0 }}
+                                style={{ position: 'relative', cursor: 'crosshair', display: 'inline-block', maxWidth: '100%', lineHeight: 0, borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}
                                 onClick={(e) => {
                                     const rect = e.currentTarget.getBoundingClientRect();
                                     const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
