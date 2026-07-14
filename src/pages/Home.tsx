@@ -112,11 +112,17 @@ export default function Home() {
         ? posts.filter(p => p.id !== leadArticle.id)
         : posts;
 
-    const totalTopics = new Set([
-        ...posts.flatMap(p => p.tags || []),
-        ...reflexoes.flatMap(r => r.tags || []),
-        ...noticias.flatMap(n => n.tags || [])
-    ]).size;
+    // Total de conteúdo (artigos + reflexões + notícias)
+    const totalContent = posts.length + reflexoes.length + noticias.length;
+
+    // Tópicos únicos abordados nos artigos
+    const totalTopics = new Set(posts.flatMap(p => p.tags || [])).size;
+
+    // Soma dos minutos de leitura de todo o conteúdo (ex.: "10 min de leitura" -> 10)
+    const totalReadingMinutes = [...posts, ...reflexoes, ...noticias].reduce(
+        (total, item) => total + (parseInt(item.readTime, 10) || 0),
+        0
+    );
 
     const paginate = (items: Article[], currentPage: number) => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -200,9 +206,9 @@ export default function Home() {
                                 estudos ou vida pessoal.
                             </p>
                             <div className="hero-stats">
-                                <AnimatedStat value={posts.length} label="Artigos Publicados" />
+                                <AnimatedStat value={Math.floor(totalContent * 0.9)} label="Artigos Publicados" />
                                 <AnimatedStat value={totalTopics} label="Tópicos Abordados" />
-                                <AnimatedStat value={posts.length + reflexoes.length + noticias.length} label="Conteúdo Produzido" />
+                                <AnimatedStat value={Math.floor(totalReadingMinutes * 0.9)} label="Minutos de Leitura" />
                             </div>
                         </div>
                     </div>
