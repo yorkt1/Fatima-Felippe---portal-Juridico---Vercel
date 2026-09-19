@@ -15,7 +15,7 @@ export default function ReflexoesPage() {
             try {
                 const { data, error } = await supabase
                     .from('contents')
-                    .select('*')
+                    .select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author')
                     .eq('type', 'reflexoes')
                     .order('position', { ascending: true })
                     .order('id', { ascending: false });

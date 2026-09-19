@@ -2,36 +2,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
-
-// Normaliza string: minúsculas + remove acentos
-function normalize(str: string): string {
-    return str
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-}
-
-// Divide a query em tokens não-vazios
-function tokenize(query: string): string[] {
-    return query.trim().split(/\s+/).filter(Boolean);
-}
-
-// Verifica se um item passa nos filtros de todos os tokens
-function matchesAllTokens(item: Article, tokens: string[]): boolean {
-    const searchable = normalize(
-        [
-            item.title,
-            item.excerpt,
-            item.author,
-            ...(item.tags || []),
-            item.categoryName,
-            // Remove tags HTML do content antes de buscar
-            item.content.replace(/<[^>]*>/g, ' '),
-        ].join(' ')
-    );
-
-    return tokens.every(token => searchable.includes(normalize(token)));
-}
+import { normalize, tokenize, matchesAllTokens } from '../utils/search';
 
 // Destaca os termos encontrados em um texto puro
 function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
@@ -115,9 +86,9 @@ export default function SearchPage() {
 
             // Busca todos os dados do Supabase de uma vez
             const [{ data: artigosData }, { data: reflexoesData }, { data: noticiasData }] = await Promise.all([
-                supabase.from('contents').select('*').eq('type', 'artigos').order('position', { ascending: true }),
-                supabase.from('contents').select('*').eq('type', 'reflexoes').order('position', { ascending: true }),
-                supabase.from('contents').select('*').eq('type', 'noticias').order('position', { ascending: true }),
+                supabase.from('contents').select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author, tags, content').eq('type', 'artigos').order('position', { ascending: true }),
+                supabase.from('contents').select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author, tags, content').eq('type', 'reflexoes').order('position', { ascending: true }),
+                supabase.from('contents').select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author, tags, content').eq('type', 'noticias').order('position', { ascending: true }),
             ]);
 
             const allArtigos: Article[] = artigosData || [];

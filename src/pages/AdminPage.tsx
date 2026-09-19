@@ -116,14 +116,16 @@ export default function AdminPage() {
             // Since Supabase doesn't support bulk update of different values easily in one query without RPC,
             // we will iterate. For small lists this is fine. For larger lists, an RPC function would be better.
 
-            // To avoid too many requests, we can just update the ones that changed?
-            // Actually, simply iterating is safer to ensure consistency.
-            await Promise.all(updates.map(update =>
+            // supabase-js resolves with { error } instead of rejecting the promise,
+            // so Promise.all alone never catches a failed update — check each result explicitly.
+            const results = await Promise.all(updates.map(update =>
                 supabase
                     .from('contents')
                     .update({ position: update.position })
                     .eq('id', update.id)
             ));
+            const failed = results.find(r => r.error);
+            if (failed?.error) throw failed.error;
 
             showToast('Ordem atualizada com sucesso', 'success');
         } catch (err) {
@@ -154,12 +156,14 @@ export default function AdminPage() {
         }));
 
         try {
-            await Promise.all(updates.map(update =>
+            const results = await Promise.all(updates.map(update =>
                 supabase
                     .from('contents')
                     .update({ position: update.position })
                     .eq('id', update.id)
             ));
+            const failed = results.find(r => r.error);
+            if (failed?.error) throw failed.error;
 
             showToast('Ordem atualizada com sucesso', 'success');
         } catch (err) {

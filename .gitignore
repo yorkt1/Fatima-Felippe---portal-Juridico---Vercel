@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Ferramentas locais do Claude Code / claude-flow
+.claude-flow/
+
+# Gerado automaticamente pelo prebuild (scripts/generate-sitemap.mjs)
+public/sitemap.xml
+
 # Variáveis de ambiente (não versionar segredos)
 .env
 .env.*

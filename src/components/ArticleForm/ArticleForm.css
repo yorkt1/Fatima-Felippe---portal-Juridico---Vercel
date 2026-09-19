@@ -1,0 +1,475 @@
+                /* ── Wrapper geral ── */
+                .doc-editor-wrapper { margin: 0 !important; }
+
+                /* ── Container principal ── */
+                .doc-editor-container {
+                    border: 1.5px solid #cbd5e1;
+                    border-radius: 12px;
+                    overflow: visible;
+                    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+                    position: relative;
+                }
+
+                /* ── Toolbar FIXA na tela ── */
+                .doc-toolbar {
+                    position: sticky;
+                    top: 0;
+                    z-index: 100;
+                    background: #f8fafc;
+                    border-bottom: 1.5px solid #e2e8f0;
+                    border-radius: 12px 12px 0 0;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+                }
+                .doc-toolbar-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 1px;
+                    padding: 6px 10px;
+                }
+
+                /* Botões da toolbar */
+                .doc-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 28px;
+                    height: 28px;
+                    padding: 0 6px;
+                    border: none;
+                    border-radius: 5px;
+                    background: transparent;
+                    color: #334155;
+                    font-size: 13px;
+                    cursor: pointer;
+                    transition: background 0.12s, color 0.12s;
+                    white-space: nowrap;
+                }
+                .doc-btn:hover { background: #e2e8f0; }
+                .doc-btn.active {
+                    background: #dbeafe;
+                    color: #1d4ed8;
+                    font-weight: 700;
+                }
+
+                /* Botão Importar DOCX na toolbar */
+                .doc-btn-import {
+                    background: #eff6ff;
+                    color: #2563eb;
+                    border: 1px solid #bfdbfe;
+                    font-weight: 500;
+                    padding: 0 9px;
+                    gap: 4px;
+                }
+                .doc-btn-import:hover { background: #dbeafe; }
+
+                /* Botão Salvar na toolbar */
+                .doc-btn-save {
+                    background: #16a34a;
+                    color: white;
+                    border: none;
+                    font-weight: 600;
+                    padding: 0 12px;
+                    gap: 4px;
+                    border-radius: 6px;
+                }
+                .doc-btn-save:hover { background: #15803d; }
+                .doc-btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+                /* Separadores */
+                .doc-sep {
+                    width: 1px;
+                    height: 20px;
+                    background: #cbd5e1;
+                    margin: 0 5px;
+                    align-self: center;
+                    flex-shrink: 0;
+                }
+
+                /* Selects de fonte */
+                .doc-select {
+                    height: 28px;
+                    padding: 0 4px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 5px;
+                    font-size: 12.5px;
+                    color: #334155;
+                    background: white;
+                    cursor: pointer;
+                }
+                .doc-select-font { width: 130px; }
+                .doc-select-size { width: 54px; }
+
+                /* ── Seletor de cor com paleta ── */
+                .doc-color-picker-wrap {
+                    position: relative;
+                    display: inline-flex;
+                    align-items: center;
+                }
+                .doc-color-trigger {
+                    flex-direction: column;
+                    height: 32px;
+                    gap: 1px;
+                    padding: 0 5px;
+                }
+                .doc-color-bar {
+                    display: block;
+                    width: 18px;
+                    height: 4px;
+                    border-radius: 2px;
+                }
+                .doc-color-palette {
+                    position: absolute;
+                    top: calc(100% + 4px);
+                    left: 0;
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+                    padding: 10px;
+                    z-index: 200;
+                    min-width: 180px;
+                }
+                .doc-palette-label {
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-bottom: 8px;
+                }
+                .doc-palette-grid {
+                    display: grid;
+                    grid-template-columns: repeat(10, 20px);
+                    gap: 3px;
+                    margin-bottom: 8px;
+                }
+                .doc-palette-swatch {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 4px;
+                    border: 1px solid rgba(0,0,0,0.12);
+                    cursor: pointer;
+                    padding: 0;
+                    transition: transform 0.1s;
+                }
+                .doc-palette-swatch:hover { transform: scale(1.25); border-color: #2563eb; }
+                .doc-palette-custom {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    color: #475569;
+                    border-top: 1px solid #f1f5f9;
+                    padding-top: 8px;
+                }
+                .doc-custom-color-input {
+                    width: 32px;
+                    height: 24px;
+                    padding: 0;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                /* Popups */
+                .doc-popup {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 7px 12px;
+                    border-top: 1px solid #e2e8f0;
+                    font-size: 13px;
+                    color: #334155;
+                    flex-wrap: wrap;
+                }
+                .doc-popup-link { background: #eff6ff; }
+                .doc-popup-table { background: #f0fdf4; }
+                .doc-popup-input {
+                    flex: 1;
+                    min-width: 180px;
+                    padding: 4px 8px;
+                    border: 1px solid #93c5fd;
+                    border-radius: 5px;
+                    font-size: 13px;
+                }
+                .doc-popup-num {
+                    width: 52px;
+                    padding: 3px 6px;
+                    border: 1px solid #86efac;
+                    border-radius: 5px;
+                    font-size: 13px;
+                    margin-left: 4px;
+                }
+                .doc-popup-ok {
+                    padding: 4px 14px;
+                    background: #2563eb;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 13px;
+                    font-weight: 500;
+                }
+                .doc-popup-cancel {
+                    padding: 4px 8px;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    color: #64748b;
+                    font-size: 14px;
+                }
+
+                /* ── Canvas / Folha A4 ── */
+                .doc-canvas {
+                    background: #e8eaed;
+                    padding: 32px 24px 48px;
+                    min-height: 600px;
+                    display: flex;
+                    justify-content: center;
+                    overflow-x: auto;
+                }
+
+                /* Folha A4 */
+                .doc-page {
+                    background: #fff;
+                    width: 794px;       /* A4 em 96dpi */
+                    min-height: 1123px; /* altura A4 */
+                    padding: 80px 90px 80px 90px; /* margens de documento */
+                    box-shadow:
+                        0 1px 3px rgba(0,0,0,0.12),
+                        0 4px 24px rgba(0,0,0,0.12);
+                    border-radius: 2px;
+                    flex-shrink: 0;
+                    position: relative;
+                }
+
+                /* Área de escrita dentro da folha */
+                .doc-editor-body {
+                    outline: none;
+                    min-height: 100%;
+                }
+                .doc-editor-body .ProseMirror {
+                    outline: none;
+                    min-height: 900px;
+                    font-family: 'Calibri', 'Georgia', 'Times New Roman', serif;
+                    font-size: 12pt;
+                    color: #1a1a1a;
+                    word-break: break-word;
+                    hyphens: auto;
+                }
+
+                /* Parágrafos */
+                .doc-editor-body .ProseMirror p {
+                    margin: 0 0 0.6em 0;
+                }
+
+                /* Títulos estilo documento */
+                .doc-editor-body .ProseMirror h1 {
+                    font-size: 20pt;
+                    font-weight: 700;
+                    margin: 1.2em 0 0.5em;
+                    color: #1e293b;
+                    border-bottom: 2px solid #e2e8f0;
+                    padding-bottom: 6px;
+                }
+                .doc-editor-body .ProseMirror h2 {
+                    font-size: 16pt;
+                    font-weight: 700;
+                    margin: 1em 0 0.4em;
+                    color: #1e3a5f;
+                }
+                .doc-editor-body .ProseMirror h3 {
+                    font-size: 13pt;
+                    font-weight: 700;
+                    margin: 0.8em 0 0.4em;
+                    color: #1e3a5f;
+                }
+                .doc-editor-body .ProseMirror h4,
+                .doc-editor-body .ProseMirror h5,
+                .doc-editor-body .ProseMirror h6 {
+                    font-size: 12pt;
+                    font-weight: 600;
+                    margin: 0.7em 0 0.3em;
+                    color: #334155;
+                }
+
+                /* Listas */
+                .doc-editor-body .ProseMirror ul,
+                .doc-editor-body .ProseMirror ol {
+                    padding-left: 28px;
+                    margin: 0.4em 0 0.8em;
+                }
+                .doc-editor-body .ProseMirror li { margin-bottom: 3px; }
+
+                /* Citação */
+                .doc-editor-body .ProseMirror blockquote {
+                    border-left: 3px solid #94a3b8;
+                    margin: 14px 0;
+                    padding: 8px 18px;
+                    background: #f8fafc;
+                    color: #475569;
+                    font-style: italic;
+                }
+
+                /* Código */
+                .doc-editor-body .ProseMirror pre {
+                    background: #1e293b;
+                    color: #e2e8f0;
+                    border-radius: 6px;
+                    padding: 14px 18px;
+                    font-size: 11pt;
+                    overflow-x: auto;
+                    margin: 12px 0;
+                }
+                .doc-editor-body .ProseMirror code {
+                    background: #f1f5f9;
+                    border-radius: 3px;
+                    padding: 1px 5px;
+                    font-size: 10.5pt;
+                }
+                .doc-editor-body .ProseMirror pre code {
+                    background: transparent;
+                    padding: 0;
+                }
+
+                /* Links */
+                .doc-editor-body .ProseMirror a {
+                    color: #1d4ed8;
+                    text-decoration: underline;
+                }
+
+                /* Imagens — suport total dentro da folha */
+                .doc-editor-body .ProseMirror img {
+                    max-width: 100%;
+                    height: auto;
+                    display: block;
+                    margin: 12px auto;
+                    border-radius: 4px;
+                    box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+                    cursor: pointer;
+                }
+                .doc-editor-body .ProseMirror img.ProseMirror-selectednode {
+                    outline: 3px solid #2563eb;
+                    border-radius: 4px;
+                }
+
+                /* Tabelas estilo documento */
+                .doc-editor-body .ProseMirror table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 14px 0;
+                    table-layout: auto;
+                }
+                .doc-editor-body .ProseMirror td,
+                .doc-editor-body .ProseMirror th {
+                    border: 1px solid #cbd5e1;
+                    padding: 7px 12px;
+                    min-width: 50px;
+                    vertical-align: top;
+                    position: relative;
+                    font-size: 11pt;
+                }
+                .doc-editor-body .ProseMirror th {
+                    background: #f1f5f9;
+                    font-weight: 700;
+                    color: #1e293b;
+                }
+                .doc-editor-body .ProseMirror .selectedCell:after {
+                    background: rgba(37,99,235,0.12);
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    pointer-events: none;
+                }
+                .doc-editor-body .ProseMirror .column-resize-handle {
+                    background: #2563eb;
+                    bottom: -2px;
+                    pointer-events: none;
+                    position: absolute;
+                    right: -2px;
+                    top: 0;
+                    width: 3px;
+                }
+
+                /* Placeholder */
+                .doc-editor-body .ProseMirror p.is-editor-empty:first-child::before {
+                    content: 'Comece a digitar ou cole aqui o conteúdo do Word...';
+                    color: #94a3b8;
+                    pointer-events: none;
+                    float: left;
+                    height: 0;
+                    font-style: italic;
+                }
+
+                /* ── Menu de espaçamento de parágrafo ── */
+                .doc-lineh-trigger {
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 3px;
+                    padding: 0 8px;
+                    height: 28px;
+                    min-width: 52px;
+                    border: 1px solid #e2e8f0 !important;
+                    border-radius: 5px !important;
+                    background: white !important;
+                }
+                .doc-lineh-trigger:hover { background: #f1f5f9 !important; }
+                .doc-lineh-trigger.active { border-color: #93c5fd !important; background: #eff6ff !important; }
+                .doc-lineh-menu {
+                    position: absolute;
+                    top: calc(100% + 4px);
+                    left: 0;
+                    background: white;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+                    padding: 8px;
+                    z-index: 300;
+                    min-width: 210px;
+                }
+                .doc-lineh-option {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    width: 100%;
+                    padding: 7px 10px;
+                    border: none;
+                    border-radius: 6px;
+                    background: transparent;
+                    cursor: pointer;
+                    font-size: 13px;
+                    text-align: left;
+                    transition: background 0.1s;
+                }
+                .doc-lineh-option:hover { background: #f1f5f9; }
+
+                /* Preview visual de espaçamento (3 barrinhas) */
+                .doc-lineh-preview {
+                    display: inline-flex;
+                    flex-direction: column;
+                    gap: calc(var(--lh, 1.5) * 3px);
+                    width: 22px;
+                    flex-shrink: 0;
+                }
+                .doc-lineh-preview span {
+                    display: block;
+                    height: 2px;
+                    background: currentColor;
+                    border-radius: 1px;
+                    opacity: 0.7;
+                }
+
+                /* Regua no topo da página (decorativa) */
+                .doc-page::before {
+                    content: '';
+                    display: block;
+                    height: 3px;
+                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    border-radius: 2px 2px 0 0;
+                    opacity: 0.6;
+                }

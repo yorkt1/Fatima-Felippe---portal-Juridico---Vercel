@@ -70,21 +70,21 @@ export default function Home() {
         try {
             const { data: artigosData } = await supabase
                 .from('contents')
-                .select('*')
+                .select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author, tags, featured')
                 .eq('type', 'artigos')
                 .order('position', { ascending: true })
                 .order('id', { ascending: false });
 
             const { data: reflexoesData } = await supabase
                 .from('contents')
-                .select('*')
+                .select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author, tags, featured')
                 .eq('type', 'reflexoes')
                 .order('position', { ascending: true })
                 .order('id', { ascending: false });
 
             const { data: noticiasData } = await supabase
                 .from('contents')
-                .select('*')
+                .select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author, tags, featured')
                 .eq('type', 'noticias')
                 .order('position', { ascending: true })
                 .order('id', { ascending: false });

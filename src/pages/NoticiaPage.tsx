@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import SkeletonArticleDetail from '../components/SkeletonArticleDetail';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
 // Remove &nbsp; e outros resíduos do Word que quebram a justificação do texto
 function cleanHtml(html: string): string {
-    return html
+    const withoutNbsp = html
         .replace(/&nbsp;/g, ' ')
         .replace(/\u00a0/g, ' ');
+    return DOMPurify.sanitize(withoutNbsp);
 }
 
 export default function NoticiaPage() {
@@ -25,6 +28,7 @@ export default function NoticiaPage() {
                     .from('contents')
                     .select('*')
                     .eq('id', id)
+                    .eq('type', 'noticias')
                     .single();
 
                 if (error) throw error;
@@ -38,6 +42,11 @@ export default function NoticiaPage() {
 
         fetchNoticia();
     }, [id]);
+
+    useDocumentMeta(
+        noticia ? `${noticia.title} — Fatima Felippe` : undefined,
+        noticia?.excerpt
+    );
 
     if (loading) {
         return <SkeletonArticleDetail />;
@@ -99,7 +108,7 @@ export default function NoticiaPage() {
 
                 <div
                     className="article-section"
-                    dangerouslySetInnerHTML={{ __html: cleanHtml(noticia.content) }}
+                    dangerouslySetInnerHTML={{ __html: cleanHtml(noticia.content || '') }}
                 />
 
                 <div style={{ marginTop: '40px', textAlign: 'center' }}>

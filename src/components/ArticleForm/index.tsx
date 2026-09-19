@@ -15,305 +15,15 @@ import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import FontFamily from '@tiptap/extension-font-family';
-import { Extension } from '@tiptap/core';
-import type { CommandProps } from '@tiptap/core';
-import { supabase } from '../services/supabase';
-import type { Article } from '../data/content';
+import type { Selection } from '@tiptap/pm/state';
+import { supabase } from '../../services/supabase';
+import type { Article } from '../../data/content';
 import { Upload } from 'lucide-react';
 import * as mammoth from 'mammoth';
-
-// Extensão customizada para suporte a font-size inline
-const FontSize = Extension.create({
-    name: 'fontSize',
-    addGlobalAttributes() {
-        return [
-            {
-                types: ['textStyle'],
-                attributes: {
-                    fontSize: {
-                        default: null,
-                        parseHTML: element => element.style.fontSize || null,
-                        renderHTML: attributes => {
-                            if (!attributes.fontSize) return {};
-                            return { style: `font-size: ${attributes.fontSize}` };
-                        },
-                    },
-                },
-            },
-        ];
-    },
-});
-
-// Extensão de Tab = recuo de parágrafo (como o Word)
-const TabIndent = Extension.create({
-    name: 'tabIndent',
-    addKeyboardShortcuts() {
-        return {
-            // Tab insere um recuo visual fixo (salvo no banco, exibido ao usuário)
-            Tab: () =>
-                this.editor.commands.insertContent(
-                    '<span style="display:inline-block;width:2em"> </span>'
-                ),
-        };
-    },
-});
-
-// Extensão de Indentação (aumentar/diminuir recuo via margin-left)
-const Indent = Extension.create({
-    name: 'indent',
-    addGlobalAttributes() {
-        return [
-            {
-                types: ['paragraph', 'heading'],
-                attributes: {
-                    indent: {
-                        default: 0,
-                        parseHTML: element => {
-                            const ml = element.style.marginLeft;
-                            if (!ml) return 0;
-                            return parseInt(ml) / 40 || 0;
-                        },
-                        renderHTML: attributes => {
-                            if (!attributes.indent || attributes.indent === 0) return {};
-                            return { style: `margin-left: ${attributes.indent * 40}px` };
-                        },
-                    },
-                },
-            },
-        ];
-    },
-    addCommands() {
-        return {
-            increaseIndent: () => ({ tr, state, dispatch }: CommandProps) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node, pos) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        const indent = (node.attrs.indent || 0) + 1;
-                        if (dispatch) {
-                            tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-            decreaseIndent: () => ({ tr, state, dispatch }: CommandProps) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node, pos) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        const indent = Math.max(0, (node.attrs.indent || 0) - 1);
-                        if (dispatch) {
-                            tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent });
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-        } as any;
-    },
-});
-
-const LineHeight = Extension.create({
-    name: 'lineHeight',
-    addGlobalAttributes() {
-        return [
-            {
-                types: ['paragraph', 'heading'],
-                attributes: {
-                    lineHeight: {
-                        default: null,
-                        parseHTML: element => element.style.lineHeight || null,
-                        renderHTML: attributes => {
-                            if (!attributes.lineHeight) return {};
-                            return { style: `line-height: ${attributes.lineHeight} !important` };
-                        },
-                    },
-                    marginTop: {
-                        default: null,
-                        parseHTML: element => element.style.marginTop || null,
-                        renderHTML: attributes => {
-                            if (!attributes.marginTop) return {};
-                            return { style: `margin-top: ${attributes.marginTop} !important` };
-                        },
-                    },
-                    marginBottom: {
-                        default: null,
-                        parseHTML: element => element.style.marginBottom || null,
-                        renderHTML: attributes => {
-                            if (!attributes.marginBottom) return {};
-                            return { style: `margin-bottom: ${attributes.marginBottom} !important` };
-                        },
-                    },
-                },
-            },
-        ];
-    },
-    addCommands() {
-        return {
-            setLineHeight: (lineHeight: string) => ({ tr, state, dispatch }: any) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        if (node.attrs.lineHeight !== lineHeight) {
-                            if (dispatch) {
-                                tr.setNodeMarkup(pos, undefined, { ...node.attrs, lineHeight });
-                            }
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-            unsetLineHeight: () => ({ tr, state, dispatch }: any) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        if (node.attrs.lineHeight) {
-                            if (dispatch) {
-                                const attrs = { ...node.attrs };
-                                delete attrs.lineHeight;
-                                tr.setNodeMarkup(pos, undefined, attrs);
-                            }
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-            setMarginTop: (marginTop: string) => ({ tr, state, dispatch }: any) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        if (node.attrs.marginTop !== marginTop) {
-                            if (dispatch) {
-                                tr.setNodeMarkup(pos, undefined, { ...node.attrs, marginTop });
-                            }
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-            unsetMarginTop: () => ({ tr, state, dispatch }: any) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        if (node.attrs.marginTop) {
-                            if (dispatch) {
-                                const attrs = { ...node.attrs };
-                                delete attrs.marginTop;
-                                tr.setNodeMarkup(pos, undefined, attrs);
-                            }
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-            setMarginBottom: (marginBottom: string) => ({ tr, state, dispatch }: any) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        if (node.attrs.marginBottom !== marginBottom) {
-                            if (dispatch) {
-                                tr.setNodeMarkup(pos, undefined, { ...node.attrs, marginBottom });
-                            }
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-            unsetMarginBottom: () => ({ tr, state, dispatch }: any) => {
-                const { from, to } = state.selection;
-                let changed = false;
-                state.doc.nodesBetween(from, to, (node: any, pos: number) => {
-                    if (node.type.name === 'paragraph' || node.type.name === 'heading') {
-                        if (node.attrs.marginBottom) {
-                            if (dispatch) {
-                                const attrs = { ...node.attrs };
-                                delete attrs.marginBottom;
-                                tr.setNodeMarkup(pos, undefined, attrs);
-                            }
-                            changed = true;
-                        }
-                    }
-                });
-                return changed;
-            },
-        } as any;
-    },
-});
-
-// Função que limpa HTML do Word preservando estilos visuais importantes
-function cleanWordHtml(html: string): string {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    // Propriedades CSS que queremos PRESERVAR
-    const KEEP_PROPS = new Set([
-        'color', 'background-color', 'font-size', 'font-family',
-        'font-weight', 'font-style', 'text-decoration', 'text-align',
-        'border', 'border-top', 'border-bottom', 'border-left', 'border-right',
-        'border-collapse', 'width', 'height', 'padding', 'padding-top',
-        'padding-bottom', 'padding-left', 'padding-right', 'vertical-align',
-        'line-height', 'margin', 'margin-top', 'margin-bottom',
-        'text-indent', 'white-space',
-    ]);
-
-    // Para cada elemento com style, filtra apenas propriedades úteis
-    doc.querySelectorAll('[style]').forEach(el => {
-        const htmlEl = el as HTMLElement;
-        const raw = htmlEl.getAttribute('style') || '';
-        // Separa declarações
-        const decls = raw.split(';').map(s => s.trim()).filter(Boolean);
-        const kept: string[] = [];
-        for (const decl of decls) {
-            const colonIdx = decl.indexOf(':');
-            if (colonIdx === -1) continue;
-            const prop = decl.slice(0, colonIdx).trim().toLowerCase();
-            const val = decl.slice(colonIdx + 1).trim().toLowerCase();
-            // Ignora propriedades MSO/Office e valores vazios
-            if (prop.startsWith('mso') || prop.startsWith('-aw') || !val) continue;
-            // Remove text-align: left/start do Word (será aplicado justify via CSS)
-            // Preserva center e right que o usuário escolheu explicitamente
-            if (prop === 'text-align' && (val === 'left' || val === 'start' || val === 'justify')) continue;
-            if (KEEP_PROPS.has(prop)) {
-                kept.push(`${prop}: ${val}`);
-            }
-        }
-        if (kept.length > 0) {
-            htmlEl.setAttribute('style', kept.join('; '));
-        } else {
-            htmlEl.removeAttribute('style');
-        }
-    });
-
-    // Remove classes MSO
-    doc.querySelectorAll('[class]').forEach(el => {
-        const cls = el.getAttribute('class') || '';
-        if (/Mso/i.test(cls)) el.removeAttribute('class');
-    });
-
-    // Remove comentários condicionais do Word (não acessíveis via DOM, então regex no body)
-    let result = doc.body.innerHTML;
-    result = result.replace(/<!--\[if[\s\S]*?\[endif\]-->/gi, '');
-    result = result.replace(/<!--[^>]*-->/g, '');
-
-    // IMPORTANTE: Converte espaços fixos do Word (&nbsp;) para espaços normais. 
-    // Isso é o que mais impede o text-align: justify de encostar perfeitamente nas extremidades!
-    result = result.replace(/&nbsp;/g, ' ');
-
-    return result;
-}
+import { FontSize, TabIndent, Indent, LineHeight } from './extensions';
+import { cleanWordHtml, base64ToBlob } from './wordImport';
+import { useToast } from '../Toast';
+import './ArticleForm.css';
 
 interface ArticleFormProps {
     type: string;
@@ -343,6 +53,7 @@ const LINE_HEIGHTS = [
 ];
 
 export default function ArticleForm({ type, initialData, onCancel, onSuccess }: ArticleFormProps) {
+    const { showToast, ToastComponent } = useToast();
     const [loading, setLoading] = useState(false);
     const [audioUploading, setAudioUploading] = useState(false);
     const [linkUrl, setLinkUrl] = useState('');
@@ -361,9 +72,10 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
     const audioInputRef = useRef<HTMLInputElement>(null);
     const prevLineHeightRef = useRef<string | null>(null);
     // Salva a seleção do editor antes de abrir o dropdown (evita perda de foco)
-    const savedSelectionRef = useRef<any>(null);
+    const savedSelectionRef = useRef<Selection | null>(null);
 
     const [formData, setFormData] = useState<Partial<Article>>(initialData || {
+        type,
         title: '',
         category: '',
         categoryName: '',
@@ -405,7 +117,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             TableCell,
             TabIndent,
         ],
-        content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/ /g, ' '),
+        content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/\u00a0/g, ' '),
         onUpdate: ({ editor }) => {
             setFormData(prev => ({ ...prev, content: editor.getHTML() }));
         },
@@ -438,7 +150,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             setFormData(prev => ({ ...prev, image: data.publicUrl }));
         } catch (error) {
             console.error('Error uploading image:', error);
-            alert('Erro ao enviar imagem. Verifique as permissões.');
+            showToast('Erro ao enviar imagem. Verifique as permissões.', 'error');
         } finally {
             setLoading(false);
         }
@@ -464,25 +176,39 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                         "tr => tr:fresh",
                         "td => td:fresh"
                     ],
-                    convertImage: mammoth.images.imgElement(function (image) {
-                        return image.read("base64").then(function (imageBuffer) {
-                            return {
-                                src: "data:" + image.contentType + ";base64," + imageBuffer
-                            };
-                        });
+                    // Sobe cada imagem do .docx para o Storage em vez de embuti-la como
+                    // base64 no HTML (linhas de vários MB no banco, ver base64ToBlob acima).
+                    convertImage: mammoth.images.imgElement(async (image) => {
+                        const base64 = await image.read('base64');
+                        try {
+                            const blob = base64ToBlob(base64, image.contentType);
+                            const fileExt = image.contentType.split('/').pop() || 'png';
+                            const fileName = `docx-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+                            const { error: uploadError } = await supabase.storage
+                                .from('content-images')
+                                .upload(fileName, blob, { contentType: image.contentType });
+                            if (uploadError) throw uploadError;
+                            const { data } = supabase.storage.from('content-images').getPublicUrl(fileName);
+                            return { src: data.publicUrl };
+                        } catch (uploadError) {
+                            // Falha no Storage não deve derrubar a importação inteira:
+                            // mantém a imagem inline como base64 nesse caso pontual.
+                            console.error('Error uploading docx image, embedding inline instead:', uploadError);
+                            return { src: `data:${image.contentType};base64,${base64}` };
+                        }
                     })
                 }
             );
 
             if (editor) {
                 // Insere no editor preservando HTML Rico, sem &nbsp; do Word
-                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/ /g, ' ');
+                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/\u00a0/g, ' ');
                 editor.commands.setContent(cleanedContent);
             }
-            alert("Documento Word importado com sucesso!");
+            showToast("Documento Word importado com sucesso!", 'success');
         } catch (error) {
             console.error('Error importing docx:', error);
-            alert("Erro ao importar o documento Word. Certifique-se de que é um formato .docx válido.");
+            showToast("Erro ao importar o documento Word. Certifique-se de que é um formato .docx válido.", 'error');
         } finally {
             setLoading(false);
             e.target.value = ''; // Limpa o input
@@ -505,7 +231,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             setFormData(prev => ({ ...prev, audio_url: data.publicUrl }));
         } catch (error) {
             console.error('Error uploading audio:', error);
-            alert('Erro ao enviar áudio. Verifique as permissões do storage.');
+            showToast('Erro ao enviar áudio. Verifique as permissões do storage.', 'error');
         } finally {
             setAudioUploading(false);
         }
@@ -517,15 +243,26 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
         if (audioInputRef.current) audioInputRef.current.value = '';
     };
 
-    // Upload de imagem DENTRO do editor
+    // Upload de imagem DENTRO do editor — vai para o Storage (como a capa),
+    // em vez de virar base64 inline no HTML salvo.
     const handleEditorImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
         const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-            editor?.chain().focus().setImage({ src: reader.result as string }).run();
-        };
-        reader.readAsDataURL(file);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `editor-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const { error: uploadError } = await supabase.storage
+                .from('content-images')
+                .upload(fileName, file);
+            if (uploadError) throw uploadError;
+            const { data } = supabase.storage.from('content-images').getPublicUrl(fileName);
+            editor?.chain().focus().setImage({ src: data.publicUrl }).run();
+        } catch (error) {
+            console.error('Error uploading editor image:', error);
+            showToast('Erro ao enviar imagem. Verifique as permissões do storage.', 'error');
+        } finally {
+            e.target.value = '';
+        }
     };
 
     const handleInsertLink = () => {
@@ -548,22 +285,26 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
         e.preventDefault();
         setLoading(true);
         try {
+            // formData.type reflete o select "Tipo de Conteúdo" — permite mover o
+            // item entre Artigos/Reflexões/Notícias. Cai para a aba atual (prop
+            // "type") só se por algum motivo o campo não tiver sido inicializado.
+            const contentType = formData.type || type;
             let error;
             if (isEditing && initialData?.id) {
                 const { error: updateError } = await supabase
-                    .from('contents').update({ ...formData, type }).eq('id', initialData.id);
+                    .from('contents').update({ ...formData, type: contentType }).eq('id', initialData.id);
                 error = updateError;
             } else {
                 const { error: insertError } = await supabase
-                    .from('contents').insert([{ ...formData, type }]);
+                    .from('contents').insert([{ ...formData, type: contentType }]);
                 error = insertError;
             }
             if (error) throw error;
-            alert(`Conteúdo ${isEditing ? 'atualizado' : 'adicionado'} com sucesso!`);
+            // Sucesso já é avisado pelo toast do AdminPage após onSuccess() (evita notificação dupla).
             onSuccess();
         } catch (error) {
             console.error('Error saving content:', error);
-            alert('Erro ao salvar conteúdo. Verifique as configurações do Supabase.');
+            showToast('Erro ao salvar conteúdo. Verifique as configurações do Supabase.', 'error');
         } finally {
             setLoading(false);
         }
@@ -573,11 +314,31 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
     return (
         <div style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+            {ToastComponent}
             <h2 style={{ marginBottom: '24px', fontSize: '1.25rem', color: '#111827' }}>
                 {isEditing ? 'Editar Conteúdo' : 'Novo Conteúdo'}
             </h2>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                {/* Tipo de Conteúdo — em qual seção do site o item aparece */}
+                <div className="form-row">
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Tipo de Conteúdo</label>
+                    <select name="type" value={formData.type || type}
+                        onChange={e => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                        required className="admin-login-input">
+                        <option value="artigos">Artigos</option>
+                        <option value="reflexoes">Reflexões</option>
+                        <option value="noticias">Notícias</option>
+                    </select>
+                    {isEditing && formData.type && formData.type !== initialData?.type && (
+                        <p style={{ fontSize: '12px', color: '#b45309', marginTop: '6px', marginBottom: 0 }}>
+                            ⚠️ Ao mudar o tipo, o link antigo (
+                            {initialData?.type === 'artigos' ? 'artigo' : initialData?.type === 'reflexoes' ? 'reflexao' : 'noticia'}
+                            /{initialData?.id}) para de funcionar — o item passa a existir só no novo endereço.
+                        </p>
+                    )}
+                </div>
 
                 {/* Título */}
                 <div className="form-row">
@@ -942,8 +703,8 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                 <div className="doc-sep" />
 
                                 {/* Indentação */}
-                                <button type="button" className="doc-btn" onClick={() => (editor?.chain().focus() as any).decreaseIndent().run()} title="Diminuir recuo" style={{ fontSize: 14 }}>⇤</button>
-                                <button type="button" className="doc-btn" onClick={() => (editor?.chain().focus() as any).increaseIndent().run()} title="Aumentar recuo" style={{ fontSize: 14 }}>⇥</button>
+                                <button type="button" className="doc-btn" onClick={() => editor?.chain().focus().decreaseIndent().run()} title="Diminuir recuo" style={{ fontSize: 14 }}>⇤</button>
+                                <button type="button" className="doc-btn" onClick={() => editor?.chain().focus().increaseIndent().run()} title="Aumentar recuo" style={{ fontSize: 14 }}>⇥</button>
 
                                 <div className="doc-sep" />
 
@@ -957,7 +718,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                             if (!editor) return;
                                             savedSelectionRef.current = editor.state.selection;
                                             prevLineHeightRef.current = editor.getAttributes('paragraph').lineHeight ?? null;
-                                            (window as any).isLineHeightConfirmed = false;
+                                            window.isLineHeightConfirmed = false;
                                             setShowLineHeightMenu(v => !v);
                                             setShowTextColorPalette(false);
                                             setShowBgColorPalette(false);
@@ -988,10 +749,11 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             if (!editor) return;
-                                                            (window as any).isLineHeightConfirmed = true;
+                                                            window.isLineHeightConfirmed = true;
                                                             const sel = savedSelectionRef.current;
+                                                            if (!sel) return;
                                                             editor.view.dispatch(editor.state.tr.setSelection(sel));
-                                                            (editor.chain().focus() as any).setLineHeight(lh.value).run();
+                                                            editor.chain().focus().setLineHeight(lh.value).run();
                                                             setShowLineHeightMenu(false);
                                                         }}
                                                     >
@@ -1018,13 +780,14 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                                                 onMouseDown={(e) => {
                                                                     e.preventDefault();
                                                                     if (!editor) return;
-                                                                    (window as any).isLineHeightConfirmed = true;
+                                                                    window.isLineHeightConfirmed = true;
                                                                     const sel = savedSelectionRef.current;
+                                                                    if (!sel) return;
                                                                     editor.view.dispatch(editor.state.tr.setSelection(sel));
                                                                     if (hasMarginTop) {
-                                                                        (editor.chain().focus() as any).unsetMarginTop().run();
+                                                                        editor.chain().focus().unsetMarginTop().run();
                                                                     } else {
-                                                                        (editor.chain().focus() as any).setMarginTop('12pt').run();
+                                                                        editor.chain().focus().setMarginTop('12pt').run();
                                                                     }
                                                                     setShowLineHeightMenu(false);
                                                                 }}
@@ -1039,13 +802,14 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                                                 onMouseDown={(e) => {
                                                                     e.preventDefault();
                                                                     if (!editor) return;
-                                                                    (window as any).isLineHeightConfirmed = true;
+                                                                    window.isLineHeightConfirmed = true;
                                                                     const sel = savedSelectionRef.current;
+                                                                    if (!sel) return;
                                                                     editor.view.dispatch(editor.state.tr.setSelection(sel));
                                                                     if (isSpaceAfterRemoved) {
-                                                                        (editor.chain().focus() as any).unsetMarginBottom().run();
+                                                                        editor.chain().focus().unsetMarginBottom().run();
                                                                     } else {
-                                                                        (editor.chain().focus() as any).setMarginBottom('0pt').run();
+                                                                        editor.chain().focus().setMarginBottom('0pt').run();
                                                                     }
                                                                     setShowLineHeightMenu(false);
                                                                 }}
@@ -1065,10 +829,11 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                                     onMouseDown={(e) => {
                                                         e.preventDefault();
                                                         if (!editor) return;
-                                                        (window as any).isLineHeightConfirmed = true;
+                                                        window.isLineHeightConfirmed = true;
                                                         const sel = savedSelectionRef.current;
+                                                        if (!sel) return;
                                                         editor.view.dispatch(editor.state.tr.setSelection(sel));
-                                                        (editor.chain().focus() as any).unsetLineHeight().unsetMarginTop().unsetMarginBottom().run();
+                                                        editor.chain().focus().unsetLineHeight().unsetMarginTop().unsetMarginBottom().run();
                                                         setShowLineHeightMenu(false);
                                                     }}
                                                 >
@@ -1132,7 +897,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                     style={{ color: '#6b7280', fontSize: 12, gap: 3 }}
                                     onClick={() => {
                                         if (!editor) return;
-                                        (editor.chain().focus() as any)
+                                        editor.chain().focus()
                                             .clearNodes()
                                             .unsetAllMarks()
                                             .unsetLineHeight()
@@ -1221,486 +986,6 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                     </button>
                 </div>
             </form>
-
-            {/* ══════ ESTILOS DO EDITOR DOCUMENTO ══════ */}
-            <style>{`
-
-                /* ── Wrapper geral ── */
-                .doc-editor-wrapper { margin: 0 !important; }
-
-                /* ── Container principal ── */
-                .doc-editor-container {
-                    border: 1.5px solid #cbd5e1;
-                    border-radius: 12px;
-                    overflow: visible;
-                    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-                    position: relative;
-                }
-
-                /* ── Toolbar FIXA na tela ── */
-                .doc-toolbar {
-                    position: sticky;
-                    top: 0;
-                    z-index: 100;
-                    background: #f8fafc;
-                    border-bottom: 1.5px solid #e2e8f0;
-                    border-radius: 12px 12px 0 0;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-                }
-                .doc-toolbar-row {
-                    display: flex;
-                    flex-wrap: wrap;
-                    align-items: center;
-                    gap: 1px;
-                    padding: 6px 10px;
-                }
-
-                /* Botões da toolbar */
-                .doc-btn {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 28px;
-                    height: 28px;
-                    padding: 0 6px;
-                    border: none;
-                    border-radius: 5px;
-                    background: transparent;
-                    color: #334155;
-                    font-size: 13px;
-                    cursor: pointer;
-                    transition: background 0.12s, color 0.12s;
-                    white-space: nowrap;
-                }
-                .doc-btn:hover { background: #e2e8f0; }
-                .doc-btn.active {
-                    background: #dbeafe;
-                    color: #1d4ed8;
-                    font-weight: 700;
-                }
-
-                /* Botão Importar DOCX na toolbar */
-                .doc-btn-import {
-                    background: #eff6ff;
-                    color: #2563eb;
-                    border: 1px solid #bfdbfe;
-                    font-weight: 500;
-                    padding: 0 9px;
-                    gap: 4px;
-                }
-                .doc-btn-import:hover { background: #dbeafe; }
-
-                /* Botão Salvar na toolbar */
-                .doc-btn-save {
-                    background: #16a34a;
-                    color: white;
-                    border: none;
-                    font-weight: 600;
-                    padding: 0 12px;
-                    gap: 4px;
-                    border-radius: 6px;
-                }
-                .doc-btn-save:hover { background: #15803d; }
-                .doc-btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
-
-                /* Separadores */
-                .doc-sep {
-                    width: 1px;
-                    height: 20px;
-                    background: #cbd5e1;
-                    margin: 0 5px;
-                    align-self: center;
-                    flex-shrink: 0;
-                }
-
-                /* Selects de fonte */
-                .doc-select {
-                    height: 28px;
-                    padding: 0 4px;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 5px;
-                    font-size: 12.5px;
-                    color: #334155;
-                    background: white;
-                    cursor: pointer;
-                }
-                .doc-select-font { width: 130px; }
-                .doc-select-size { width: 54px; }
-
-                /* ── Seletor de cor com paleta ── */
-                .doc-color-picker-wrap {
-                    position: relative;
-                    display: inline-flex;
-                    align-items: center;
-                }
-                .doc-color-trigger {
-                    flex-direction: column;
-                    height: 32px;
-                    gap: 1px;
-                    padding: 0 5px;
-                }
-                .doc-color-bar {
-                    display: block;
-                    width: 18px;
-                    height: 4px;
-                    border-radius: 2px;
-                }
-                .doc-color-palette {
-                    position: absolute;
-                    top: calc(100% + 4px);
-                    left: 0;
-                    background: white;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 10px;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-                    padding: 10px;
-                    z-index: 200;
-                    min-width: 180px;
-                }
-                .doc-palette-label {
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #64748b;
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    margin-bottom: 8px;
-                }
-                .doc-palette-grid {
-                    display: grid;
-                    grid-template-columns: repeat(10, 20px);
-                    gap: 3px;
-                    margin-bottom: 8px;
-                }
-                .doc-palette-swatch {
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 4px;
-                    border: 1px solid rgba(0,0,0,0.12);
-                    cursor: pointer;
-                    padding: 0;
-                    transition: transform 0.1s;
-                }
-                .doc-palette-swatch:hover { transform: scale(1.25); border-color: #2563eb; }
-                .doc-palette-custom {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 12px;
-                    color: #475569;
-                    border-top: 1px solid #f1f5f9;
-                    padding-top: 8px;
-                }
-                .doc-custom-color-input {
-                    width: 32px;
-                    height: 24px;
-                    padding: 0;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-
-                /* Popups */
-                .doc-popup {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 7px 12px;
-                    border-top: 1px solid #e2e8f0;
-                    font-size: 13px;
-                    color: #334155;
-                    flex-wrap: wrap;
-                }
-                .doc-popup-link { background: #eff6ff; }
-                .doc-popup-table { background: #f0fdf4; }
-                .doc-popup-input {
-                    flex: 1;
-                    min-width: 180px;
-                    padding: 4px 8px;
-                    border: 1px solid #93c5fd;
-                    border-radius: 5px;
-                    font-size: 13px;
-                }
-                .doc-popup-num {
-                    width: 52px;
-                    padding: 3px 6px;
-                    border: 1px solid #86efac;
-                    border-radius: 5px;
-                    font-size: 13px;
-                    margin-left: 4px;
-                }
-                .doc-popup-ok {
-                    padding: 4px 14px;
-                    background: #2563eb;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 13px;
-                    font-weight: 500;
-                }
-                .doc-popup-cancel {
-                    padding: 4px 8px;
-                    background: transparent;
-                    border: none;
-                    cursor: pointer;
-                    color: #64748b;
-                    font-size: 14px;
-                }
-
-                /* ── Canvas / Folha A4 ── */
-                .doc-canvas {
-                    background: #e8eaed;
-                    padding: 32px 24px 48px;
-                    min-height: 600px;
-                    display: flex;
-                    justify-content: center;
-                    overflow-x: auto;
-                }
-
-                /* Folha A4 */
-                .doc-page {
-                    background: #fff;
-                    width: 794px;       /* A4 em 96dpi */
-                    min-height: 1123px; /* altura A4 */
-                    padding: 80px 90px 80px 90px; /* margens de documento */
-                    box-shadow:
-                        0 1px 3px rgba(0,0,0,0.12),
-                        0 4px 24px rgba(0,0,0,0.12);
-                    border-radius: 2px;
-                    flex-shrink: 0;
-                    position: relative;
-                }
-
-                /* Área de escrita dentro da folha */
-                .doc-editor-body {
-                    outline: none;
-                    min-height: 100%;
-                }
-                .doc-editor-body .ProseMirror {
-                    outline: none;
-                    min-height: 900px;
-                    font-family: 'Calibri', 'Georgia', 'Times New Roman', serif;
-                    font-size: 12pt;
-                    color: #1a1a1a;
-                    word-break: break-word;
-                    hyphens: auto;
-                }
-
-                /* Parágrafos */
-                .doc-editor-body .ProseMirror p {
-                    margin: 0 0 0.6em 0;
-                }
-
-                /* Títulos estilo documento */
-                .doc-editor-body .ProseMirror h1 {
-                    font-size: 20pt;
-                    font-weight: 700;
-                    margin: 1.2em 0 0.5em;
-                    color: #1e293b;
-                    border-bottom: 2px solid #e2e8f0;
-                    padding-bottom: 6px;
-                }
-                .doc-editor-body .ProseMirror h2 {
-                    font-size: 16pt;
-                    font-weight: 700;
-                    margin: 1em 0 0.4em;
-                    color: #1e3a5f;
-                }
-                .doc-editor-body .ProseMirror h3 {
-                    font-size: 13pt;
-                    font-weight: 700;
-                    margin: 0.8em 0 0.4em;
-                    color: #1e3a5f;
-                }
-                .doc-editor-body .ProseMirror h4,
-                .doc-editor-body .ProseMirror h5,
-                .doc-editor-body .ProseMirror h6 {
-                    font-size: 12pt;
-                    font-weight: 600;
-                    margin: 0.7em 0 0.3em;
-                    color: #334155;
-                }
-
-                /* Listas */
-                .doc-editor-body .ProseMirror ul,
-                .doc-editor-body .ProseMirror ol {
-                    padding-left: 28px;
-                    margin: 0.4em 0 0.8em;
-                }
-                .doc-editor-body .ProseMirror li { margin-bottom: 3px; }
-
-                /* Citação */
-                .doc-editor-body .ProseMirror blockquote {
-                    border-left: 3px solid #94a3b8;
-                    margin: 14px 0;
-                    padding: 8px 18px;
-                    background: #f8fafc;
-                    color: #475569;
-                    font-style: italic;
-                }
-
-                /* Código */
-                .doc-editor-body .ProseMirror pre {
-                    background: #1e293b;
-                    color: #e2e8f0;
-                    border-radius: 6px;
-                    padding: 14px 18px;
-                    font-size: 11pt;
-                    overflow-x: auto;
-                    margin: 12px 0;
-                }
-                .doc-editor-body .ProseMirror code {
-                    background: #f1f5f9;
-                    border-radius: 3px;
-                    padding: 1px 5px;
-                    font-size: 10.5pt;
-                }
-                .doc-editor-body .ProseMirror pre code {
-                    background: transparent;
-                    padding: 0;
-                }
-
-                /* Links */
-                .doc-editor-body .ProseMirror a {
-                    color: #1d4ed8;
-                    text-decoration: underline;
-                }
-
-                /* Imagens — suport total dentro da folha */
-                .doc-editor-body .ProseMirror img {
-                    max-width: 100%;
-                    height: auto;
-                    display: block;
-                    margin: 12px auto;
-                    border-radius: 4px;
-                    box-shadow: 0 1px 6px rgba(0,0,0,0.12);
-                    cursor: pointer;
-                }
-                .doc-editor-body .ProseMirror img.ProseMirror-selectednode {
-                    outline: 3px solid #2563eb;
-                    border-radius: 4px;
-                }
-
-                /* Tabelas estilo documento */
-                .doc-editor-body .ProseMirror table {
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin: 14px 0;
-                    table-layout: auto;
-                }
-                .doc-editor-body .ProseMirror td,
-                .doc-editor-body .ProseMirror th {
-                    border: 1px solid #cbd5e1;
-                    padding: 7px 12px;
-                    min-width: 50px;
-                    vertical-align: top;
-                    position: relative;
-                    font-size: 11pt;
-                }
-                .doc-editor-body .ProseMirror th {
-                    background: #f1f5f9;
-                    font-weight: 700;
-                    color: #1e293b;
-                }
-                .doc-editor-body .ProseMirror .selectedCell:after {
-                    background: rgba(37,99,235,0.12);
-                    content: '';
-                    position: absolute;
-                    inset: 0;
-                    pointer-events: none;
-                }
-                .doc-editor-body .ProseMirror .column-resize-handle {
-                    background: #2563eb;
-                    bottom: -2px;
-                    pointer-events: none;
-                    position: absolute;
-                    right: -2px;
-                    top: 0;
-                    width: 3px;
-                }
-
-                /* Placeholder */
-                .doc-editor-body .ProseMirror p.is-editor-empty:first-child::before {
-                    content: 'Comece a digitar ou cole aqui o conteúdo do Word...';
-                    color: #94a3b8;
-                    pointer-events: none;
-                    float: left;
-                    height: 0;
-                    font-style: italic;
-                }
-
-                /* ── Menu de espaçamento de parágrafo ── */
-                .doc-lineh-trigger {
-                    flex-direction: row;
-                    align-items: center;
-                    gap: 3px;
-                    padding: 0 8px;
-                    height: 28px;
-                    min-width: 52px;
-                    border: 1px solid #e2e8f0 !important;
-                    border-radius: 5px !important;
-                    background: white !important;
-                }
-                .doc-lineh-trigger:hover { background: #f1f5f9 !important; }
-                .doc-lineh-trigger.active { border-color: #93c5fd !important; background: #eff6ff !important; }
-                .doc-lineh-menu {
-                    position: absolute;
-                    top: calc(100% + 4px);
-                    left: 0;
-                    background: white;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 10px;
-                    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
-                    padding: 8px;
-                    z-index: 300;
-                    min-width: 210px;
-                }
-                .doc-lineh-option {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    width: 100%;
-                    padding: 7px 10px;
-                    border: none;
-                    border-radius: 6px;
-                    background: transparent;
-                    cursor: pointer;
-                    font-size: 13px;
-                    text-align: left;
-                    transition: background 0.1s;
-                }
-                .doc-lineh-option:hover { background: #f1f5f9; }
-
-                /* Preview visual de espaçamento (3 barrinhas) */
-                .doc-lineh-preview {
-                    display: inline-flex;
-                    flex-direction: column;
-                    gap: calc(var(--lh, 1.5) * 3px);
-                    width: 22px;
-                    flex-shrink: 0;
-                }
-                .doc-lineh-preview span {
-                    display: block;
-                    height: 2px;
-                    background: currentColor;
-                    border-radius: 1px;
-                    opacity: 0.7;
-                }
-
-                /* Regua no topo da página (decorativa) */
-                .doc-page::before {
-                    content: '';
-                    display: block;
-                    height: 3px;
-                    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    border-radius: 2px 2px 0 0;
-                    opacity: 0.6;
-                }
-            `}</style>
         </div>
     );
 }

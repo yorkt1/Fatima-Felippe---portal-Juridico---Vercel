@@ -15,7 +15,7 @@ export default function ArtigosPage() {
             try {
                 const { data, error } = await supabase
                     .from('contents')
-                    .select('*')
+                    .select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author')
                     .eq('type', 'artigos')
                     .order('position', { ascending: true })
                     .order('id', { ascending: false });

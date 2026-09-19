@@ -15,7 +15,7 @@ export default function NoticiasPage() {
             try {
                 const { data, error } = await supabase
                     .from('contents')
-                    .select('*')
+                    .select('id, category, categoryName, date, readTime, title, excerpt, image, image_position, author')
                     .eq('type', 'noticias')
                     .order('position', { ascending: true })
                     .order('id', { ascending: false });
