@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
@@ -17,12 +17,15 @@ import FontFamily from '@tiptap/extension-font-family';
 import type { Selection } from '@tiptap/pm/state';
 import { supabase } from '../../services/supabase';
 import type { Article } from '../../data/content';
-import { Upload } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, PenLine, Save } from 'lucide-react';
 import * as mammoth from 'mammoth';
 import { FontSize, TabIndent, Indent, LineHeight, TextIndent, CellWithBackground } from './extensions';
 import { embedDocxFormatting, applyDocxFormatting } from './docxFormatting';
 import { cleanWordHtml, base64ToBlob } from './wordImport';
 import { useToast } from '../Toast';
+import ConfirmModal from '../ConfirmModal';
+import { ActionBar, Section } from '../admin/FormParts';
+import ArticleMetaFields from './ArticleMetaFields';
 import './ArticleForm.css';
 
 interface ArticleFormProps {
@@ -31,6 +34,11 @@ interface ArticleFormProps {
     onCancel: () => void;
     onSuccess: () => void;
 }
+
+const TYPE_LABEL: Record<string, string> = { artigos: 'Artigos', reflexoes: 'Reflexões', noticias: 'Notícias' };
+// O campo "Categoria" antigo (artigo/reflexão/notícia) não influencia mais o visual do site;
+// continua sendo gravado, preenchido a partir do tipo, para manter o formato dos dados.
+const CATEGORY_BY_TYPE: Record<string, string> = { artigos: 'artigo', reflexoes: 'reflexao', noticias: 'noticia' };
 
 const FONT_SIZES = ['10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '48', '72'];
 const FONT_FAMILIES = [
@@ -56,6 +64,9 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
     const { showToast, ToastComponent } = useToast();
     const [loading, setLoading] = useState(false);
     const [audioUploading, setAudioUploading] = useState(false);
+    const [imageUploading, setImageUploading] = useState(false);
+    const [confirmDiscard, setConfirmDiscard] = useState(false);
+    const formRef = useRef<HTMLFormElement>(null);
     const [linkUrl, setLinkUrl] = useState('');
     const [showLinkInput, setShowLinkInput] = useState(false);
     const [tableRows, setTableRows] = useState(3);
@@ -91,6 +102,33 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
     });
 
     const isEditing = !!initialData;
+
+    // "Alterações não salvas": compara com o estado de quando o formulário abriu.
+    const [initialSnapshot] = useState(() => JSON.stringify(formData));
+    const dirty = JSON.stringify(formData) !== initialSnapshot;
+
+    // Fechar a aba com alterações pendentes pede confirmação ao navegador.
+    useEffect(() => {
+        if (!dirty) return;
+        const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+        window.addEventListener('beforeunload', warn);
+        return () => window.removeEventListener('beforeunload', warn);
+    }, [dirty]);
+
+    // Ctrl/Cmd + S salva (passa pela validação dos campos obrigatórios).
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                formRef.current?.requestSubmit();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, []);
+
+    const busy = loading || imageUploading || audioUploading;
+    const requestCancel = () => (dirty ? setConfirmDiscard(true) : onCancel());
 
     const editor = useEditor({
         extensions: [
@@ -131,14 +169,9 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
         },
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         try {
-            setLoading(true);
+            setImageUploading(true);
             if (!e.target.files || e.target.files.length === 0) return;
             const file = e.target.files[0];
             const fileExt = file.name.split('.').pop();
@@ -153,7 +186,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             console.error('Error uploading image:', error);
             showToast('Erro ao enviar imagem. Verifique as permissões.', 'error');
         } finally {
-            setLoading(false);
+            setImageUploading(false);
         }
     };
 
@@ -293,14 +326,21 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             // item entre Artigos/Reflexões/Notícias. Cai para a aba atual (prop
             // "type") só se por algum motivo o campo não tiver sido inicializado.
             const contentType = formData.type || type;
+            const payload = {
+                ...formData,
+                type: contentType,
+                category: formData.category || CATEGORY_BY_TYPE[contentType] || '',
+                // Tags vazias (ex.: vírgula sobrando) não são gravadas — elas inflavam o contador "Tópicos".
+                tags: (formData.tags ?? []).map(t => t.trim()).filter(Boolean),
+            };
             let error;
             if (isEditing && initialData?.id) {
                 const { error: updateError } = await supabase
-                    .from('contents').update({ ...formData, type: contentType }).eq('id', initialData.id);
+                    .from('contents').update(payload).eq('id', initialData.id);
                 error = updateError;
             } else {
                 const { error: insertError } = await supabase
-                    .from('contents').insert([{ ...formData, type: contentType }]);
+                    .from('contents').insert([payload]);
                 error = insertError;
             }
             if (error) throw error;
@@ -317,239 +357,52 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
 
     return (
-        <div style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+        <>
             {ToastComponent}
-            <h2 style={{ marginBottom: '24px', fontSize: '1.25rem', color: '#111827' }}>
-                {isEditing ? 'Editar Conteúdo' : 'Novo Conteúdo'}
-            </h2>
+            <ConfirmModal
+                isOpen={confirmDiscard}
+                title="Descartar alterações?"
+                message="Você tem alterações que ainda não foram salvas. Se sair agora, elas serão perdidas."
+                confirmLabel="Descartar"
+                cancelLabel="Continuar editando"
+                onConfirm={onCancel}
+                onCancel={() => setConfirmDiscard(false)}
+            />
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-                {/* Tipo de Conteúdo — em qual seção do site o item aparece */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Tipo de Conteúdo</label>
-                    <select name="type" value={formData.type || type}
-                        onChange={e => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                        required className="admin-login-input">
-                        <option value="artigos">Artigos</option>
-                        <option value="reflexoes">Reflexões</option>
-                        <option value="noticias">Notícias</option>
-                    </select>
-                    {isEditing && formData.type && formData.type !== initialData?.type && (
-                        <p style={{ fontSize: '12px', color: '#b45309', marginTop: '6px', marginBottom: 0 }}>
-                            ⚠️ Ao mudar o tipo, o link antigo (
-                            {initialData?.type === 'artigos' ? 'artigo' : initialData?.type === 'reflexoes' ? 'reflexao' : 'noticia'}
-                            /{initialData?.id}) para de funcionar — o item passa a existir só no novo endereço.
-                        </p>
-                    )}
-                </div>
-
-                {/* Título */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Título</label>
-                    <input type="text" name="title" value={formData.title} onChange={handleChange} required
-                        className="admin-login-input" placeholder="Digite o título do artigo..." />
-                </div>
-
-                {/* Categoria + Nome */}
-                <div className="form-row form-row-group">
-                    <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Categoria</label>
-                        <select name="category" value={formData.category}
-                            onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                            required className="admin-login-input">
-                            <option value="">Selecione uma categoria</option>
-                            <option value="artigo">Artigo</option>
-                            <option value="reflexao">Reflexão</option>
-                            <option value="noticia">Notícia</option>
-                        </select>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Nome Exibido</label>
-                        <input type="text" name="categoryName" placeholder="ex: Direito Civil"
-                            value={formData.categoryName} onChange={handleChange} required className="admin-login-input" />
-                    </div>
-                </div>
-
-                {/* Data + Leitura */}
-                <div className="form-row form-row-group">
-                    <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Data</label>
-                        <input type="text" name="date" value={formData.date} onChange={handleChange} required
-                            className="admin-login-input" placeholder="ex: 11 de janeiro de 2024" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Tempo de Leitura</label>
-                        <input type="text" name="readTime" value={formData.readTime} onChange={handleChange} required
-                            className="admin-login-input" placeholder="ex: 5 min de leitura" />
-                    </div>
-                </div>
-
-                {/* Autor */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>✍️ Autor</label>
-                    <input
-                        type="text"
-                        name="author"
-                        value={formData.author || ''}
-                        onChange={handleChange}
-                        required
-                        className="admin-login-input"
-                        placeholder="ex: Fátima T. Felippe, Redação..."
-                    />
-                </div>
-
-                {/* Imagem de Capa */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Imagem de Capa</label>
-                    <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151', minWidth: '100px' }}>Cole uma URL:</span>
-                        <input type="text" name="image" placeholder="https://..." value={formData.image}
-                            onChange={handleChange} className="admin-login-input" style={{ flex: 1 }} />
-                    </div>
-                    <div className="image-upload-area">
-                        <input type="file" accept="image/*" onChange={handleImageUpload} className="image-upload-input" />
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                            <Upload size={32} />
-                            <span>Ou clique para upload / arraste uma imagem</span>
+            <form ref={formRef} className="adm-form" onSubmit={handleSubmit}>
+                <div className="adm-page">
+                    <button type="button" className="adm-backlink" onClick={requestCancel}>
+                        <ArrowLeft size={16} aria-hidden="true" /> Voltar para {TYPE_LABEL[type] ?? 'a lista'}
+                    </button>
+                    <div className="adm-pagehead">
+                        <div>
+                            <h1>{isEditing ? 'Editar conteúdo' : 'Novo conteúdo'}</h1>
+                            <p>Preencha as informações e escreva o texto. Nada vai para o site até você salvar.</p>
                         </div>
                     </div>
-                    {formData.image && (
-                        <div style={{ marginTop: '10px', padding: '14px', border: '1px solid #e5e7eb', borderRadius: '10px', background: '#fafafa' }}>
-                            <span style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 500, color: '#374151' }}>
-                                🎯 Ponto focal — clique na imagem para escolher o que aparece recortado nos cards
-                            </span>
-                            <div
-                                style={{ position: 'relative', cursor: 'crosshair', display: 'inline-block', maxWidth: '100%', lineHeight: 0, borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}
-                                onClick={(e) => {
-                                    const rect = e.currentTarget.getBoundingClientRect();
-                                    const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
-                                    const x = clamp(((e.clientX - rect.left) / rect.width) * 100);
-                                    const y = clamp(((e.clientY - rect.top) / rect.height) * 100);
-                                    setFormData(prev => ({ ...prev, image_position: `${x}% ${y}%` }));
-                                }}
-                            >
-                                <img src={formData.image} alt="Preview"
-                                    style={{ maxHeight: '320px', maxWidth: '100%', width: 'auto', height: 'auto', display: 'block' }} />
-                                {/* Marcador do ponto focal escolhido */}
-                                <span style={{
-                                    position: 'absolute',
-                                    left: (formData.image_position || '50% 50%').split(' ')[0],
-                                    top: (formData.image_position || '50% 50%').split(' ')[1],
-                                    transform: 'translate(-50%, -50%)',
-                                    width: 22, height: 22, borderRadius: '50%',
-                                    border: '3px solid #2563eb',
-                                    boxShadow: '0 0 0 2px white, 0 1px 4px rgba(0,0,0,0.4)',
-                                    background: 'rgba(37,99,235,0.25)',
-                                    pointerEvents: 'none',
-                                }} />
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px', fontSize: '13px', color: '#6b7280' }}>
-                                <span>Posição: <strong>{formData.image_position || '50% 50%'}</strong></span>
-                                <button type="button" className="btn"
-                                    onClick={() => setFormData(prev => ({ ...prev, image_position: '50% 50%' }))}
-                                    style={{ padding: '4px 10px', fontSize: '12px' }}>
-                                    Centralizar
-                                </button>
-                            </div>
-                            {/* Mini pré-visualização do recorte do card */}
-                            <div style={{ marginTop: '10px' }}>
-                                <span style={{ fontSize: '12px', color: '#9ca3af' }}>Como ficará no card:</span>
-                                <div style={{ width: '240px', height: '150px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb', marginTop: '4px' }}>
-                                    <img src={formData.image} alt="Card preview"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: formData.image_position || '50% 50%', display: 'block' }} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
 
-                {/* Tags */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Tags (separadas por vírgula)</label>
-                    <input type="text" name="tagsInput"
-                        placeholder="Ex: Constituição Federal, Direito Civil, Emendas"
-                        value={formData.tags?.join(', ') || ''}
-                        onChange={e => {
-                            const newTags = e.target.value.split(',').map(t => t.trim());
-                            setFormData(prev => ({ ...prev, tags: newTags }));
-                        }}
-                        className="admin-login-input" />
-                </div>
+                    <div className="adm-stack" style={{ gap: 20 }}>
+                        <ArticleMetaFields
+                            formData={formData}
+                            setFormData={setFormData}
+                            type={type}
+                            initialData={initialData}
+                            imageUploading={imageUploading}
+                            audioUploading={audioUploading}
+                            audioInputRef={audioInputRef}
+                            onImageUpload={handleImageUpload}
+                            onAudioUpload={handleAudioUpload}
+                            onRemoveAudio={handleRemoveAudio}
+                        />
 
-                {/* Áudio da Reflexão / Artigo */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>🎧 Áudio (opcional)</label>
-                    <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '10px', marginTop: 0 }}>Envie um arquivo de áudio (.mp3, .wav, .ogg) que será exibido junto ao conteúdo para o leitor.</p>
-                    
-                    {!formData.audio_url ? (
-                        <div className="audio-upload-area">
-                            <input
-                                ref={audioInputRef}
-                                type="file"
-                                accept="audio/mpeg,audio/wav,audio/ogg,audio/mp3,.mp3,.wav,.ogg"
-                                onChange={handleAudioUpload}
-                                className="image-upload-input"
-                                disabled={audioUploading}
-                            />
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                                <span style={{ fontSize: '32px' }}>{audioUploading ? '⏳' : '🎵'}</span>
-                                <span>{audioUploading ? 'Enviando áudio...' : 'Clique para upload ou arraste um áudio'}</span>
-                                <span style={{ fontSize: '11px', color: '#9ca3af' }}>Formatos: MP3, WAV, OGG</span>
-                            </div>
-                        </div>
-                    ) : (
-                        <div style={{ 
-                            padding: '16px', 
-                            background: '#f0fdf4', 
-                            borderRadius: '10px', 
-                            border: '1px solid #bbf7d0',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '12px'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <span style={{ fontWeight: 600, color: '#16a34a', fontSize: '14px' }}>✅ Áudio carregado</span>
-                                <button
-                                    type="button"
-                                    onClick={handleRemoveAudio}
-                                    style={{
-                                        background: '#fee2e2',
-                                        color: '#dc2626',
-                                        border: '1px solid #fca5a5',
-                                        borderRadius: '6px',
-                                        padding: '4px 12px',
-                                        cursor: 'pointer',
-                                        fontSize: '13px',
-                                        fontWeight: 500
-                                    }}
-                                >
-                                    🗑 Remover
-                                </button>
-                            </div>
-                            <audio controls style={{ width: '100%' }}>
-                                <source src={formData.audio_url} type="audio/mpeg" />
-                                Seu navegador não suporta o elemento de áudio.
-                            </audio>
-                        </div>
-                    )}
-                </div>
-
-                {/* Resumo */}
-                <div className="form-row">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#374151' }}>Resumo</label>
-                    <textarea name="excerpt" value={formData.excerpt} onChange={handleChange} required rows={3}
-                        className="admin-login-input" placeholder="Breve descrição do artigo..." />
-                </div>
-
+                        <Section
+                            className="adm-editorcard"
+                            icon={<PenLine size={18} />}
+                            title="Conteúdo"
+                            description="Cole do Word ou importe um .docx — mantém alinhamento, cor, tamanho, fonte, realce, recuos e cor de tabela."
+                        >
                 {/* ══════════════ EDITOR RICO — LAYOUT DOCUMENTO ══════════════ */}
                 <div className="doc-editor-wrapper" style={{ width: '100%' }}>
-
-                    {/* Título simples acima do editor, sem deslocar o layout */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                        <label style={{ fontWeight: 600, color: '#1e293b', fontSize: '15px' }}>✏️ Conteúdo Completo</label>
-                        <span style={{ fontSize: '12px', color: '#64748b' }}>Cole do Word ou importe um .docx — mantém alinhamento, cor, tamanho, fonte, realce, recuos e cor de tabela</span>
-                    </div>
 
                     {/* Container principal do editor */}
                     <div className="doc-editor-container">
@@ -938,15 +791,6 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                                     />
                                 </label>
 
-                                {/* Salvar na toolbar */}
-                                <button
-                                    type="submit"
-                                    className="doc-btn doc-btn-save"
-                                    disabled={loading}
-                                    title="Salvar conteúdo"
-                                >
-                                    {loading ? '⏳' : '💾'} Salvar
-                                </button>
                             </div>
 
                             {/* Popups inline */}
@@ -980,16 +824,27 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                     </div>
                 </div>
 
-                {/* Botões de ação */}
-                <div className="form-actions">
-                    <button type="submit" className="btn primary" disabled={loading} style={{ padding: '10px 28px', fontSize: '1rem' }}>
-                        {loading ? 'Salvando...' : '💾 Salvar Conteúdo'}
-                    </button>
-                    <button type="button" className="btn" onClick={onCancel} disabled={loading} style={{ padding: '10px 24px', fontSize: '1rem' }}>
+                        </Section>
+                    </div>
+                </div>
+
+                <ActionBar
+                    status={
+                        dirty
+                            ? <span className="adm-badge adm-badge--warn">Alterações não salvas</span>
+                            : <span className="adm-actionbar__hint">{isEditing ? 'Nenhuma alteração pendente. ' : 'Nada foi salvo ainda. '}Dica: <span className="adm-kbd">Ctrl</span> + <span className="adm-kbd">S</span> salva rápido.</span>
+                    }
+                >
+                    <button type="button" className="adm-btn" onClick={requestCancel} disabled={loading}>
                         Cancelar
                     </button>
-                </div>
+                    <button type="submit" className="adm-btn adm-btn--primary" disabled={busy}>
+                        {loading
+                            ? <><LoaderCircle size={17} className="adm-spin" aria-hidden="true" /> Salvando…</>
+                            : <><Save size={17} aria-hidden="true" /> Salvar</>}
+                    </button>
+                </ActionBar>
             </form>
-        </div>
+        </>
     );
 }

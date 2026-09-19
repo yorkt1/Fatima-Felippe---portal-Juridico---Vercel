@@ -1,61 +1,50 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { CircleCheck, CircleX, Info, X } from 'lucide-react';
+
+type ToastType = 'success' | 'error' | 'info';
 
 interface ToastProps {
     message: string;
-    type: 'success' | 'error' | 'info';
+    type: ToastType;
     onClose: () => void;
 }
 
+const ICONS = { success: CircleCheck, error: CircleX, info: Info } as const;
+
 export default function Toast({ message, type, onClose }: ToastProps) {
+    // Erros ficam um pouco mais na tela para dar tempo de ler.
     useEffect(() => {
-        const timer = setTimeout(() => {
-            onClose();
-        }, 3000);
-
+        const timer = setTimeout(onClose, type === 'error' ? 6000 : 4000);
         return () => clearTimeout(timer);
-    }, [onClose]);
+    }, [onClose, type, message]);
 
-    const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+    const Icon = ICONS[type];
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: bgColor,
-            color: 'white',
-            padding: '16px 24px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            zIndex: 9999,
-            animation: 'slideIn 0.3s ease-out',
-            maxWidth: '400px'
-        }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '20px' }}>
-                    {type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}
-                </span>
-                <span>{message}</span>
+        <div className="adm-toasts">
+            <div className={`adm-toast adm-toast--${type}`} role={type === 'error' ? 'alert' : 'status'}>
+                <Icon size={18} className="adm-toast__icon" aria-hidden="true" />
+                <span className="adm-toast__msg">{message}</span>
+                <button type="button" className="adm-toast__close" onClick={onClose} aria-label="Fechar aviso">
+                    <X size={16} />
+                </button>
             </div>
         </div>
     );
 }
 
 export function useToast() {
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
-    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    // Funções estáveis: antes o "onClose" mudava a cada renderização do formulário
+    // e o temporizador reiniciava sempre — o aviso podia nunca sumir.
+    const showToast = useCallback((message: string, type: ToastType = 'info') => {
         setToast({ message, type });
-    };
+    }, []);
+    const close = useCallback(() => setToast(null), []);
 
-    const ToastComponent = toast ? (
-        <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-        />
-    ) : null;
+    const ToastComponent = toast ? <Toast message={toast.message} type={toast.type} onClose={close} /> : null;
 
     return { showToast, ToastComponent };
 }

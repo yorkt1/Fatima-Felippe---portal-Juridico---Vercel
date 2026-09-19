@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Eye, EyeOff, LoaderCircle, TriangleAlert } from 'lucide-react';
 import { supabase } from '../services/supabase';
+import '../admin/index.css';
 
 // E-mail fixo do administrador. A tela pede só a senha; este e-mail é usado
 // internamente para autenticar no Supabase Auth.
@@ -10,12 +12,17 @@ const ADMIN_EMAIL = 'admin@fatimafelippe.com.br';
 
 export default function AdminLoginPage() {
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!password) {
+            setError('Digite a senha para entrar.');
+            return;
+        }
         setError('');
         setLoading(true);
 
@@ -27,7 +34,7 @@ export default function AdminLoginPage() {
         setLoading(false);
 
         if (signInError) {
-            setError('Senha incorreta');
+            setError('Senha incorreta. Tente novamente.');
             setPassword('');
         } else {
             navigate('/admin');
@@ -35,81 +42,57 @@ export default function AdminLoginPage() {
     };
 
     return (
-        <div className="admin-login-container">
-            <div className="admin-login-card">
-                <h1 className="admin-login-title">
-                    Área Restrita
-                </h1>
+        <div className="adm adm-login">
+            <div className="adm-login__card">
+                <div className="adm-login__brand">
+                    <div className="adm-login__mark" aria-hidden="true">FF</div>
+                    <h1 className="adm-login__title">Painel Administrativo</h1>
+                    <p className="adm-login__sub">Entre com a senha para gerenciar o conteúdo do portal.</p>
+                </div>
 
-                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div>
-                        <label
-                            htmlFor="code"
-                            style={{
-                                display: 'block',
-                                marginBottom: '8px',
-                                fontSize: '0.875rem',
-                                color: '#4b5563'
-                            }}
-                        >
-                            Senha de Acesso
-                        </label>
-                        <input
-                            id="code"
-                            type="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Digite a senha..."
-                            className="admin-login-input"
-                            autoFocus
-                        />
+                <form onSubmit={handleLogin} noValidate>
+                    <div className="adm-field">
+                        <label className="adm-label" htmlFor="admin-password">Senha de acesso</label>
+                        <div className="adm-pass">
+                            <input
+                                id="admin-password"
+                                className="adm-input"
+                                type={showPassword ? 'text' : 'password'}
+                                autoComplete="current-password"
+                                value={password}
+                                onChange={e => { setPassword(e.target.value); if (error) setError(''); }}
+                                placeholder="Digite a senha"
+                                aria-invalid={error ? true : undefined}
+                                aria-describedby={error ? 'admin-login-error' : undefined}
+                                autoFocus
+                            />
+                            <button
+                                type="button"
+                                className="adm-iconbtn adm-pass__toggle"
+                                onClick={() => setShowPassword(v => !v)}
+                                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                                title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
 
                     {error && (
-                        <div style={{
-                            color: '#dc2626',
-                            fontSize: '0.875rem',
-                            textAlign: 'center',
-                            background: '#fee2e2',
-                            padding: '8px',
-                            borderRadius: '4px'
-                        }}>
-                            {error}
+                        <div id="admin-login-error" className="adm-alert adm-alert--error" role="alert">
+                            <TriangleAlert size={16} aria-hidden="true" />
+                            <span>{error}</span>
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        className="btn primary"
-                        disabled={loading}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            fontSize: '1rem',
-                            marginTop: '8px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            opacity: loading ? 0.7 : 1
-                        }}
-                    >
-                        {loading ? 'Entrando...' : 'Entrar'}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => navigate('/')}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#6b7280',
-                            fontSize: '0.875rem',
-                            cursor: 'pointer',
-                            textDecoration: 'underline'
-                        }}
-                    >
-                        Voltar para o site
+                    <button type="submit" className="adm-btn adm-btn--primary" disabled={loading}>
+                        {loading ? <><LoaderCircle size={18} className="adm-spin" aria-hidden="true" /> Entrando…</> : 'Entrar'}
                     </button>
                 </form>
+
+                <button type="button" className="adm-login__back" onClick={() => navigate('/')}>
+                    <ArrowLeft size={14} aria-hidden="true" /> Voltar para o site
+                </button>
             </div>
         </div>
     );
