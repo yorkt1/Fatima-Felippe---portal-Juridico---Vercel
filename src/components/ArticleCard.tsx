@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Article } from '../data/content';
+import { categoryClass } from '../utils/category';
 
 
 interface ArticleCardProps {
@@ -12,7 +13,7 @@ export default function ArticleCard({ article, linkPrefix }: ArticleCardProps) {
     return (
         <article className="post">
             <div>
-                <span className={`category ${article.category}`}>{article.categoryName}</span>
+                <span className={`category ${categoryClass(article.categoryName, prefix === 'reflexao')}`}>{article.categoryName}</span>
                 <div className="meta">{article.date} • {article.readTime}</div>
                 <Link to={`/${prefix}/${article.id}`}>
                     <img

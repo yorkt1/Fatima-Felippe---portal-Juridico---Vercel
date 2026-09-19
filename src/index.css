@@ -99,6 +99,11 @@ nav.main-nav a.active {
     width: 220px
 }
 
+/* Botão "Ir": texto na cor padrão de botão (preto), como no original. */
+.search .btn {
+    color: buttontext;
+}
+
 /* Menu Hamburger para Mobile */
 .menu-toggle {
     display: none;
@@ -143,20 +148,16 @@ nav.main-nav a.active {
     display: inline-block;
     margin-bottom: 8px;
     word-break: break-word;
-    background: #e6f7ff;
+    background: #e6f2ff;
     color: var(--accent);
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
-.category.tributario,
-.category.trabalho,
-.category.constitucional,
-.category.procedural,
-.category.civil,
-.category.reflexoes,
-.category.artigo,
-.category.reflexao,
-.category.noticia {
+/* Só Direito Civil e Reflexões são azul-claro; as demais usam o padrão acima.
+   A classe vem do slug da subcategoria (ver src/utils/category.ts). */
+.category.direito-civil,
+.category.reflexoes {
     background: #e6f7ff;
     color: #1890ff;
 }
@@ -258,13 +259,13 @@ nav.main-nav a.active {
 }
 
 
+/* Imagem inline, sem margem (igual ao original): o pequeno espaço abaixo dela
+   (linha de base do texto) é o que separa a imagem do título. */
 .post img {
     width: 160px;
     height: 110px;
     object-fit: cover;
     border-radius: 8px;
-    display: block;
-    margin-bottom: 8px;
 }
 
 .post h3 {
@@ -307,12 +308,8 @@ aside .widget {
     margin: 0;
 }
 
-.widget ol li {
-    margin-bottom: 8px;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
+/* Sem font-size/line-height/margin próprios: herdam o padrão (16px, normal),
+   como no original. */
 .widget ol li a {
     color: var(--accent);
     text-decoration: none;
@@ -1969,37 +1966,38 @@ textarea.form-control {
     }
 }
 
-/* Pagination Styles */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin: 40px 0;
-}
-
+/* Pagination — visual do original (fatimafelippe.com.br).
+   O container (margem 18px 0, gap 8px, centralizado) é definido mais acima.
+   Os botões usam fonte 16px (herdada), texto azul e nenhuma largura mínima;
+   o botão desabilitado ("« Anterior" na 1ª página) fica com o mesmo visual
+   dos demais, como no original. */
 .pagination .btn {
-    min-width: 40px;
-    padding: 8px 12px;
+    font: inherit;
+    color: var(--accent);
+    background: #fff;
     border: 1px solid #e6e9ee;
-    background: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-decoration: none;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.pagination .btn:hover:not(:disabled) {
+.pagination .btn:hover:not(:disabled):not(.active) {
     background: #f5f5f5;
-    border-color: var(--primary);
 }
 
-.pagination .btn.primary {
-    background: var(--primary);
-    color: #0b74da;
-    border-color: var(--primary);
+.pagination .btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+    font-weight: 400;
 }
 
 .pagination .btn:disabled {
-    opacity: 0.5;
+    opacity: 1;
+    background: #fff;
+    color: var(--accent);
     cursor: not-allowed;
 }
 

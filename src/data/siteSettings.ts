@@ -18,8 +18,8 @@ const HELP_PAIRS = 'Um item por linha, no formato: Título | Descrição';
 
 export const SITE_SETTING_FIELDS: SettingField[] = [
     // ── Cabeçalho ──────────────────────────────────────────────
-    { key: 'header.logo', group: 'Cabeçalho', label: 'Logo', kind: 'image',
-        default: 'https://res.cloudinary.com/dqewxdbfx/image/upload/v1768103475/ChatGPT_Image_11_de_jan._de_2026_00_50_34_liswp9.png' },
+    { key: 'header.logoText', group: 'Cabeçalho', label: 'Iniciais do logo (quadrado azul)', kind: 'text', default: 'FF',
+        help: 'Texto curto que aparece dentro do quadrado azul, ao lado do nome.' },
     { key: 'header.name', group: 'Cabeçalho', label: 'Nome do site', kind: 'text', default: 'Fatima Felippe' },
     { key: 'header.tagline', group: 'Cabeçalho', label: 'Frase abaixo do nome', kind: 'text', default: 'Artigos, reflexões e notícias' },
 

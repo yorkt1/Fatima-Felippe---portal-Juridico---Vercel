@@ -8,6 +8,7 @@ import SkeletonCard from '../components/SkeletonCard';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
 import { Trash2, Edit, Star } from 'lucide-react';
+import { categoryClass } from '../utils/category';
 
 type ContentType = 'artigos' | 'reflexoes' | 'noticias';
 
@@ -403,7 +404,7 @@ export default function AdminPage() {
                                         {item.excerpt}
                                     </p>
                                     <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                                        <span className={`category ${item.category}`}>{item.categoryName}</span>
+                                        <span className={`category ${categoryClass(item.categoryName, selectedType === 'reflexoes')}`}>{item.categoryName}</span>
                                         <span style={{ margin: '0 8px' }}>•</span>
                                         {item.date}
                                         <span style={{ margin: '0 8px' }}>•</span>

@@ -5,6 +5,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import SkeletonArticleDetail from '../components/SkeletonArticleDetail';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import { categoryClass } from '../utils/category';
 
 // Remove &nbsp; e outros resíduos do Word que quebram a justificação do texto
 function cleanHtml(html: string): string {
@@ -67,7 +68,7 @@ export default function NoticiaPage() {
                 <button className="close-btn" onClick={() => navigate(-1)}>×</button>
 
                 <div className="article-header">
-                    <span className={`category ${noticia.category}`}>{noticia.categoryName}</span>
+                    <span className={`category ${categoryClass(noticia.categoryName)}`}>{noticia.categoryName}</span>
 
                     <div className="article-meta">
                         <div className="meta">

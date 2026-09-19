@@ -5,6 +5,7 @@ import type { Article } from '../data/content';
 import SkeletonCard from '../components/SkeletonCard';
 import ArticleCard from '../components/ArticleCard';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { categoryClass } from '../utils/category';
 
 
 // Hook que anima um número de 0 até `target` em `duration`ms
@@ -134,16 +135,19 @@ export default function Home() {
     const totalPages = (items: Article[]) => Math.ceil(items.length / itemsPerPage);
 
     const Pagination = ({ current, total, onChange }: { current: number; total: number; onChange: (page: number) => void }) => {
-        if (total <= 1) return null;
+        // Como no site original, a barra aparece sempre (mesmo com uma página só).
+        const pages = Math.max(total, 1);
 
+        // O original lista TODAS as páginas. Só passa a usar janela de 5
+        // números quando há muitas (mais de 10), para a barra não estourar.
         let visiblePages = [];
-        if (total <= 5) {
-            visiblePages = Array.from({ length: total }, (_, i) => i + 1);
+        if (pages <= 10) {
+            visiblePages = Array.from({ length: pages }, (_, i) => i + 1);
         } else {
             if (current <= 3) {
                 visiblePages = [1, 2, 3, 4, 5];
-            } else if (current >= total - 2) {
-                visiblePages = [total - 4, total - 3, total - 2, total - 1, total];
+            } else if (current >= pages - 2) {
+                visiblePages = [pages - 4, pages - 3, pages - 2, pages - 1, pages];
             } else {
                 visiblePages = [current - 2, current - 1, current, current + 1, current + 2];
             }
@@ -169,7 +173,7 @@ export default function Home() {
                 ))}
                 <button
                     onClick={() => onChange(current + 1)}
-                    disabled={current === total}
+                    disabled={current === pages}
                     className="btn"
                 >
                     Próxima »
@@ -243,7 +247,7 @@ export default function Home() {
                         <>
                             {/* Main featured card */}
                             <div className="lead-article">
-                                <span className={`category ${leadArticle.category}`}>
+                                <span className={`category ${categoryClass(leadArticle.categoryName)}`}>
                                     {leadArticle.categoryName}
                                 </span>
                                 <div className="meta">
@@ -261,9 +265,9 @@ export default function Home() {
                                     />
                                 </Link>
                                 <Link to={`/artigo/${leadArticle.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                    <h2 style={{ margin: '12px 0 6px', fontSize: '22px' }}>{leadArticle.title}</h2>
+                                    <h1>{leadArticle.title}</h1>
                                 </Link>
-                                <p style={{ color: 'var(--muted)', fontSize: '14px' }}>{leadArticle.excerpt}</p>
+                                <p className="excerpt">{leadArticle.excerpt}</p>
                                 <div style={{ marginTop: '12px' }}>
                                     <Link
                                         to={`/artigo/${leadArticle.id}`}
@@ -278,7 +282,7 @@ export default function Home() {
                             <div className="side-cards">
                                 {sideArticles.map((post) => (
                                     <Link key={post.id} to={`/artigo/${post.id}`} className="card-small">
-                                        <span className={`category ${post.category}`}>{post.categoryName}</span>
+                                        <span className={`category ${categoryClass(post.categoryName)}`}>{post.categoryName}</span>
                                         <img
                                             src={post.image}
                                             loading="lazy"
@@ -289,7 +293,7 @@ export default function Home() {
                                                 e.currentTarget.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                                             }}
                                         />
-                                        <h4 style={{ margin: '10px 0 6px', fontSize: '15px' }}>{post.title}</h4>
+                                        <h4 style={{ margin: '10px 0 6px' }}>{post.title}</h4>
                                         <div className="meta">por {post.author || 'Redação'} • {post.date}</div>
                                     </Link>
                                 ))}
@@ -324,7 +328,7 @@ export default function Home() {
                                 {posts.slice(0, 3).map((post) => (
                                     <li key={post.id}>
                                         <Link to={`/artigo/${post.id}`}>
-                                            <span className={`category ${post.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{post.categoryName.split(' ')[0]}</span>{' '}
+                                            <span className={`category ${categoryClass(post.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{post.categoryName.split(' ')[0]}</span>{' '}
                                             {post.title}
                                         </Link>
                                     </li>
@@ -362,7 +366,7 @@ export default function Home() {
                                 {reflexoes.slice(0, 3).map((reflexao) => (
                                     <li key={reflexao.id}>
                                         <Link to={`/reflexao/${reflexao.id}`}>
-                                            <span className={`category ${reflexao.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{reflexao.categoryName.split(' ')[0]}</span>{' '}
+                                            <span className={`category ${categoryClass(reflexao.categoryName, true)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{reflexao.categoryName.split(' ')[0]}</span>{' '}
                                             {reflexao.title}
                                         </Link>
                                     </li>
@@ -404,7 +408,7 @@ export default function Home() {
                                 {noticias.slice(0, 3).map((noticia) => (
                                     <li key={noticia.id}>
                                         <Link to={`/noticia/${noticia.id}`}>
-                                            <span className={`category ${noticia.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{noticia.categoryName.split(' ')[0]}</span>{' '}
+                                            <span className={`category ${categoryClass(noticia.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{noticia.categoryName.split(' ')[0]}</span>{' '}
                                             {noticia.title}
                                         </Link>
                                     </li>

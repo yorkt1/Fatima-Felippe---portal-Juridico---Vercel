@@ -1,13 +1,8 @@
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 
 export default function Footer() {
     const { get } = useSiteSettings();
-    const navigate = useNavigate();
-
-    const handleAdminAccess = () => {
-        navigate('/admin-login');
-    };
 
     return (
         <footer>
@@ -39,30 +34,8 @@ export default function Footer() {
                             </a>
                         </small>
                     </div>
-                    <div style={{ color: 'var(--muted)', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                    <div style={{ color: 'var(--muted)' }}>
                         <Link to="/privacidade">Política de Privacidade</Link>
-                        <button
-                            type="button"
-                            onClick={handleAdminAccess}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--muted)',
-                                cursor: 'pointer',
-                                fontSize: '0.75rem',
-                                textDecoration: 'none',
-                                opacity: 0.5,
-                                padding: '10px',
-                                transition: 'opacity 0.2s',
-                                zIndex: 10,
-                                position: 'relative'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
-                            title="Área restrita"
-                        >
-                            Área de desenvolvimento
-                        </button>
                     </div>
                 </div>
             </div>

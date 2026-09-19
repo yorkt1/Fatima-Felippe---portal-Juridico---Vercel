@@ -6,6 +6,7 @@ import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 import { parseLines } from '../utils/siteText';
+import { categoryClass } from '../utils/category';
 
 
 export default function ArtigosPage() {
@@ -72,7 +73,7 @@ export default function ArtigosPage() {
                                 {articles.slice(0, 3).map((article) => (
                                     <li key={article.id}>
                                         <Link to={`/artigo/${article.id}`}>
-                                            <span className={`category ${article.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                            <span className={`category ${categoryClass(article.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
                                                 {article.categoryName.split(' ')[0]}
                                             </span>{' '}
                                             {article.title}

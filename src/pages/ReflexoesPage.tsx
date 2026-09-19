@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
+import { categoryClass } from '../utils/category';
 
 
 export default function ReflexoesPage() {
@@ -59,7 +60,7 @@ export default function ReflexoesPage() {
                                 {reflexoes.slice(0, 3).map((reflexao) => (
                                     <li key={reflexao.id}>
                                         <Link to={`/reflexao/${reflexao.id}`}>
-                                            <span className={`category ${reflexao.category}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                            <span className={`category ${categoryClass(reflexao.categoryName, true)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
                                                 {reflexao.categoryName.split(' ')[0]}
                                             </span>{' '}
                                             {reflexao.title}

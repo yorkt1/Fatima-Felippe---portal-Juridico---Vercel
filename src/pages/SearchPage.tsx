@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import { normalize, tokenize, matchesAllTokens } from '../utils/search';
+import { categoryClass } from '../utils/category';
 
 // Destaca os termos encontrados em um texto puro
 function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
@@ -124,7 +125,7 @@ export default function SearchPage() {
             style={{ textDecoration: 'none', color: 'inherit' }}
         >
             <div>
-                <span className={`category ${item.category}`}>{item.categoryName}</span>
+                <span className={`category ${categoryClass(item.categoryName, prefix === 'reflexao')}`}>{item.categoryName}</span>
                 <div className="post-meta">
                     <span>{item.date}</span>
                     <span> • </span>

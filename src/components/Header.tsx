@@ -17,17 +17,12 @@ export default function Header() {
     };
 
     return (
-        <header style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+        <header>
             <div className="container topbar">
                 <div className="brand">
-                    <img
-                        src={get('header.logo')}
-                        alt="Logo"
-                        className="logo"
-                        style={{ width: '50px', height: '50px', objectFit: 'contain' }}
-                    />
+                    <div className="logo">{get('header.logoText')}</div>
                     <div>
-                        <div style={{ fontWeight: 900, fontSize: '25px' }}>{get('header.name')}</div>
+                        <div style={{ fontWeight: 1000, fontSize: '25px' }}>{get('header.name')}</div>
                         <div style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>
                             {get('header.tagline')}
                         </div>
@@ -59,7 +54,7 @@ export default function Header() {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <button type="submit" className="btn" style={{ padding: '8px 16px' }}>Ir</button>
+                        <button type="submit" className="btn">Ir</button>
                     </form>
                 </nav>
 
