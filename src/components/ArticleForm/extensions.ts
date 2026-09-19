@@ -1,5 +1,46 @@
 import { Extension } from '@tiptap/core';
 import type { CommandProps } from '@tiptap/core';
+import { TableCell } from '@tiptap/extension-table-cell';
+
+// Recuo de primeira linha do parágrafo (text-indent), como o do Word.
+// Sem isto o editor descarta o "text-indent" que vem do .docx / de colar do Word.
+export const TextIndent = Extension.create({
+    name: 'textIndent',
+    addGlobalAttributes() {
+        return [
+            {
+                types: ['paragraph', 'heading'],
+                attributes: {
+                    textIndent: {
+                        default: null,
+                        parseHTML: element => element.style.textIndent || null,
+                        renderHTML: attributes => {
+                            if (!attributes.textIndent) return {};
+                            return { style: `text-indent: ${attributes.textIndent}` };
+                        },
+                    },
+                },
+            },
+        ];
+    },
+});
+
+// Célula de tabela com cor de fundo (o sombreado de célula do Word).
+export const CellWithBackground = TableCell.extend({
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            backgroundColor: {
+                default: null,
+                parseHTML: element => element.style.backgroundColor || null,
+                renderHTML: attributes => {
+                    if (!attributes.backgroundColor) return {};
+                    return { style: `background-color: ${attributes.backgroundColor}` };
+                },
+            },
+        };
+    },
+});
 
 // Divulga ao TypeScript os comandos custom das extensões Indent/LineHeight
 // (evita precisar de "as any" toda vez que são chamados via editor.chain()).

@@ -64,3 +64,33 @@ describe('base64ToBlob', () => {
         expect(text).toBe(original);
     });
 });
+
+describe('cleanWordHtml — recuo e realce ao colar', () => {
+    it('mantém o recuo à esquerda, convertendo pt/cm para px', () => {
+        expect(cleanWordHtml('<p style="margin-left:35.4pt">x</p>')).toContain('margin-left: 47.2px');
+        expect(cleanWordHtml('<p style="margin-left:1cm">x</p>')).toContain('margin-left: 37.8px');
+        expect(cleanWordHtml('<p style="margin-left:40px">x</p>')).toContain('margin-left: 40px');
+    });
+
+    it('mantém o recuo de primeira linha', () => {
+        expect(cleanWordHtml('<p style="text-indent:35.4pt">x</p>')).toContain('text-indent: 35.4pt');
+    });
+
+    it('fundo de um trecho de texto vira <mark> (realce do Word e do Google Docs)', () => {
+        const word = cleanWordHtml('<p><span style="background:yellow;mso-highlight:yellow">realçado</span></p>');
+        expect(word).toContain('<mark style="background-color: yellow">realçado</mark>');
+        const docs = cleanWordHtml('<p><span style="background-color:#ffff00;font-weight:700">realçado</span></p>');
+        expect(docs).toContain('<mark style="background-color: #ffff00">realçado</mark>');
+    });
+
+    it('fundo transparente ou branco NÃO vira realce', () => {
+        expect(cleanWordHtml('<p><span style="background-color:transparent">texto</span></p>')).not.toContain('<mark');
+        expect(cleanWordHtml('<p><span style="background-color:#ffffff">texto</span></p>')).not.toContain('<mark');
+    });
+
+    it('fundo de célula de tabela continua como style da célula (não vira <mark>)', () => {
+        const html = cleanWordHtml('<table><tr><td style="background:#d9d9d9">célula</td></tr></table>');
+        expect(html).not.toContain('<mark');
+        expect(html).toContain('background-color');
+    });
+});

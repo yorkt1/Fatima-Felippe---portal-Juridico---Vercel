@@ -12,7 +12,6 @@ import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import FontFamily from '@tiptap/extension-font-family';
 import type { Selection } from '@tiptap/pm/state';
@@ -20,7 +19,8 @@ import { supabase } from '../../services/supabase';
 import type { Article } from '../../data/content';
 import { Upload } from 'lucide-react';
 import * as mammoth from 'mammoth';
-import { FontSize, TabIndent, Indent, LineHeight } from './extensions';
+import { FontSize, TabIndent, Indent, LineHeight, TextIndent, CellWithBackground } from './extensions';
+import { embedDocxFormatting, applyDocxFormatting } from './docxFormatting';
 import { cleanWordHtml, base64ToBlob } from './wordImport';
 import { useToast } from '../Toast';
 import './ArticleForm.css';
@@ -106,6 +106,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             FontFamily,
             LineHeight,
             Indent,
+            TextIndent,
             Link.configure({
                 openOnClick: false,
                 HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' },
@@ -114,7 +115,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
             Table.configure({ resizable: true }),
             TableRow,
             TableHeader,
-            TableCell,
+            CellWithBackground,
             TabIndent,
         ],
         content: (formData.content || '').replace(/&nbsp;/g, ' ').replace(/\u00a0/g, ' '),
@@ -163,8 +164,11 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
         try {
             const arrayBuffer = await file.arrayBuffer();
+            // O mammoth só entende a estrutura; alinhamento, cor, tamanho, fonte, realce,
+            // recuos e cor de célula vão "de carona" em marcadores (ver docxFormatting.ts).
+            const { buffer, table } = await embedDocxFormatting(arrayBuffer);
             const result = await mammoth.convertToHtml(
-                { arrayBuffer: arrayBuffer },
+                { arrayBuffer: buffer },
                 {
                     styleMap: [
                         "p[style-name='Heading 1'] => h1:fresh",
@@ -172,9 +176,8 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                         "p[style-name='Heading 3'] => h3:fresh",
                         "p[style-name='Quote'] => blockquote:fresh",
                         "r[style-name='Strong'] => strong",
-                        "table => table:fresh",
-                        "tr => tr:fresh",
-                        "td => td:fresh"
+                        "u => u",
+                        "table => table:fresh"
                     ],
                     // Sobe cada imagem do .docx para o Storage em vez de embuti-la como
                     // base64 no HTML (linhas de vários MB no banco, ver base64ToBlob acima).
@@ -202,7 +205,8 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
 
             if (editor) {
                 // Insere no editor preservando HTML Rico, sem &nbsp; do Word
-                const cleanedContent = result.value.replace(/&nbsp;/g, ' ').replace(/\u00a0/g, ' ');
+                const withFormatting = applyDocxFormatting(result.value, table);
+                const cleanedContent = withFormatting.replace(/&nbsp;/g, ' ').replace(/\u00a0/g, ' ');
                 editor.commands.setContent(cleanedContent);
             }
             showToast("Documento Word importado com sucesso!", 'success');
@@ -544,7 +548,7 @@ export default function ArticleForm({ type, initialData, onCancel, onSuccess }: 
                     {/* Título simples acima do editor, sem deslocar o layout */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                         <label style={{ fontWeight: 600, color: '#1e293b', fontSize: '15px' }}>✏️ Conteúdo Completo</label>
-                        <span style={{ fontSize: '12px', color: '#64748b' }}>Cole do Word ou importe um .docx — formatação preservada</span>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>Cole do Word ou importe um .docx — mantém alinhamento, cor, tamanho, fonte, realce, recuos e cor de tabela</span>
                     </div>
 
                     {/* Container principal do editor */}

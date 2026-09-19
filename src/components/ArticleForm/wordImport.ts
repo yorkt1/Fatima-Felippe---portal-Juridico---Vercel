@@ -11,6 +11,19 @@ export function base64ToBlob(base64: string, contentType: string): Blob {
     return new Blob([new Uint8Array(byteNumbers)], { type: contentType });
 }
 
+// Converte um comprimento CSS (pt, cm, mm, in, em, px) em px — o recuo do editor trabalha em px.
+function lengthToPx(value: string): string | null {
+    const m = value.trim().match(/^(-?\d*\.?\d+)\s*(pt|px|cm|mm|in|em)?$/);
+    if (!m) return null;
+    const factor: Record<string, number> = { pt: 96 / 72, px: 1, cm: 96 / 2.54, mm: 96 / 25.4, in: 96, em: 16 };
+    return `${Math.round(parseFloat(m[1]) * factor[m[2] ?? 'px'] * 10) / 10}px`;
+}
+
+// Cores de fundo que NÃO são realce (transparente, branco, "automático"...)
+const NOT_A_HIGHLIGHT = /^(transparent|none|auto|inherit|initial|windowtext|white|#fff|#ffffff|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))$/i;
+// Só trechos de texto viram realce; fundo de parágrafo/célula continua como style.
+const INLINE_TAGS = new Set(['SPAN', 'FONT', 'B', 'I', 'U', 'STRONG', 'EM', 'A', 'SUB', 'SUP', 'S']);
+
 // Função que limpa HTML do Word preservando estilos visuais importantes
 export function cleanWordHtml(html: string): string {
     const parser = new DOMParser();
@@ -23,7 +36,7 @@ export function cleanWordHtml(html: string): string {
         'border', 'border-top', 'border-bottom', 'border-left', 'border-right',
         'border-collapse', 'width', 'height', 'padding', 'padding-top',
         'padding-bottom', 'padding-left', 'padding-right', 'vertical-align',
-        'line-height', 'margin', 'margin-top', 'margin-bottom',
+        'line-height', 'margin', 'margin-top', 'margin-bottom', 'margin-left',
         'text-indent', 'white-space',
     ]);
 
@@ -34,6 +47,18 @@ export function cleanWordHtml(html: string): string {
         // Separa declarações
         const decls = raw.split(';').map(s => s.trim()).filter(Boolean);
         const kept: string[] = [];
+
+        // Realce (marca-texto): o editor só entende <mark>, então o fundo de um trecho
+        // de texto vira <mark style="background-color: ...">.
+        let highlight: string | null = null;
+        if (INLINE_TAGS.has(htmlEl.tagName)) {
+            const find = (name: string) => decls
+                .map(d => [d.slice(0, d.indexOf(':')).trim().toLowerCase(), d.slice(d.indexOf(':') + 1).trim().toLowerCase()])
+                .find(([k]) => k === name)?.[1];
+            const candidate = find('mso-highlight') ?? find('background-color') ?? find('background')?.split(/\s+/)[0];
+            if (candidate && !NOT_A_HIGHLIGHT.test(candidate)) highlight = candidate;
+        }
+
         for (const decl of decls) {
             const colonIdx = decl.indexOf(':');
             if (colonIdx === -1) continue;
@@ -44,6 +69,18 @@ export function cleanWordHtml(html: string): string {
             // Remove text-align: left/start do Word (será aplicado justify via CSS)
             // Preserva center e right que o usuário escolheu explicitamente
             if (prop === 'text-align' && (val === 'left' || val === 'start' || val === 'justify')) continue;
+            if (highlight && (prop === 'background-color' || prop === 'background')) continue;
+            // O Word cola o fundo de célula/parágrafo na forma abreviada (background:#D9D9D9).
+            if (prop === 'background') {
+                const first = val.split(/\s+/)[0];
+                if (first && !NOT_A_HIGHLIGHT.test(first)) kept.push(`background-color: ${first}`);
+                continue;
+            }
+            if (prop === 'margin-left') {
+                const px = lengthToPx(val);
+                if (px) kept.push(`margin-left: ${px}`);
+                continue;
+            }
             if (KEEP_PROPS.has(prop)) {
                 kept.push(`${prop}: ${val}`);
             }
@@ -52,6 +89,13 @@ export function cleanWordHtml(html: string): string {
             htmlEl.setAttribute('style', kept.join('; '));
         } else {
             htmlEl.removeAttribute('style');
+        }
+
+        if (highlight) {
+            const mark = doc.createElement('mark');
+            mark.setAttribute('style', `background-color: ${highlight}`);
+            while (htmlEl.firstChild) mark.appendChild(htmlEl.firstChild);
+            htmlEl.appendChild(mark);
         }
     });
 
