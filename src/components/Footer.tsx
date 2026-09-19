@@ -1,6 +1,8 @@
 import { useNavigate, Link } from 'react-router-dom';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 
 export default function Footer() {
+    const { get } = useSiteSettings();
     const navigate = useNavigate();
 
     const handleAdminAccess = () => {
@@ -12,8 +14,8 @@ export default function Footer() {
             <div className="container">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <div>
-                        <strong>Portal Jurídico</strong><br />
-                        <small>© 2025 — Todos os direitos reservados.</small><br />
+                        <strong>{get('footer.brand')}</strong><br />
+                        <small>{get('footer.copyright')}</small><br />
                         <small style={{ marginTop: '8px', display: 'block' }}>
                             Desenvolvido por{' '}
                             <a

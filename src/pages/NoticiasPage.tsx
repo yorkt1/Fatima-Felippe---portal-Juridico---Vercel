@@ -4,9 +4,12 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
+import { useSiteSettings } from '../hooks/useSiteSettings';
+import { parseLines } from '../utils/siteText';
 
 
 export default function NoticiasPage() {
+    const { get } = useSiteSettings();
     const [noticias, setNoticias] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -62,10 +65,9 @@ export default function NoticiasPage() {
                     <div className="widget">
                         <h4>Categorias</h4>
                         <div className="list-compact">
-                            <Link to="/noticias">Notícias Gerais</Link>
-                            <Link to="/noticias">Jurídico</Link>
-                            <Link to="/noticias">Legislação</Link>
-                            <Link to="/noticias">Tribunais</Link>
+                            {parseLines(get('sidebar.noticias')).map((label, i) => (
+                                <Link key={i} to="/noticias">{label}</Link>
+                            ))}
                         </div>
                     </div>
 

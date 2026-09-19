@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleForm from '../components/ArticleForm';
+import SiteSettingsForm from '../components/SiteSettingsForm';
 import SkeletonCard from '../components/SkeletonCard';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
@@ -14,6 +15,7 @@ export default function AdminPage() {
     const navigate = useNavigate();
     const [selectedType, setSelectedType] = useState<ContentType>('artigos');
     const [isCreating, setIsCreating] = useState(false);
+    const [showSiteSettings, setShowSiteSettings] = useState(false);
     const [editingArticle, setEditingArticle] = useState<Article | null>(null);
     const [contentList, setContentList] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
@@ -276,6 +278,14 @@ export default function AdminPage() {
         );
     }
 
+    if (showSiteSettings) {
+        return (
+            <div style={{ padding: '40px 20px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+                <SiteSettingsForm onClose={() => setShowSiteSettings(false)} />
+            </div>
+        );
+    }
+
     return (
         <div className="container" style={{ padding: '40px 20px' }}>
             {ToastComponent}
@@ -310,6 +320,13 @@ export default function AdminPage() {
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                     </button>
                 ))}
+                <button
+                    className="btn"
+                    onClick={() => setShowSiteSettings(true)}
+                    title="Editar textos, fotos, contato e rodapé do site"
+                >
+                    ⚙️ Textos do Site
+                </button>
             </div>
 
             {/* Content List */}

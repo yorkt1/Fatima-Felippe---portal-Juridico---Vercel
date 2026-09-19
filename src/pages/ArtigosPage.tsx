@@ -4,9 +4,12 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
+import { useSiteSettings } from '../hooks/useSiteSettings';
+import { parseLines } from '../utils/siteText';
 
 
 export default function ArtigosPage() {
+    const { get } = useSiteSettings();
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -54,10 +57,9 @@ export default function ArtigosPage() {
                     <div className="widget">
                         <h4>Categorias</h4>
                         <div className="list-compact">
-                            <Link to="/artigos">Direito Civil</Link>
-                            <Link to="/artigos">Direito Tributário</Link>
-                            <Link to="/artigos">Direito do Trabalho</Link>
-                            <Link to="/artigos">Direito Constitucional</Link>
+                            {parseLines(get('sidebar.artigos')).map((label, i) => (
+                                <Link key={i} to="/artigos">{label}</Link>
+                            ))}
                         </div>
                     </div>
 

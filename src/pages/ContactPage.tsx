@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
+import { useSiteSettings } from '../hooks/useSiteSettings';
+import { SITE_DEFAULTS } from '../data/siteSettings';
+import { safeHttpUrl } from '../utils/siteText';
 
 export default function ContactPage() {
+    const { get } = useSiteSettings();
     useEffect(() => {
         document.title = 'Contato — Portal Jurídico Fátima Felippe';
         window.scrollTo(0, 0);
@@ -10,8 +14,8 @@ export default function ContactPage() {
         <main className="contact-page">
             <div className="container">
                 <div className="contact-header">
-                    <h1>Entre em Contato</h1>
-                    <p>Tem alguma dúvida, sugestão ou deseja colaborar com nosso portal? Entre em contato conosco!</p>
+                    <h1>{get('contact.title')}</h1>
+                    <p>{get('contact.subtitle')}</p>
                 </div>
 
                 <div className="contact-content">
@@ -23,8 +27,8 @@ export default function ContactPage() {
                                 <div className="info-content">
                                     <h3>Email</h3>
                                     <p>
-                                        <a href="mailto:Fatimafelippe7.adv@gmail.com">
-                                            Fatimafelippe7.adv@gmail.com
+                                        <a href={`mailto:${get('contact.email')}`}>
+                                            {get('contact.email')}
                                         </a>
                                     </p>
                                 </div>
@@ -33,7 +37,7 @@ export default function ContactPage() {
                                 <div className="info-icon">📞</div>
                                 <div className="info-content">
                                     <h3>Telefone</h3>
-                                    <p>(48) 99802-1460</p>
+                                    <p>{get('contact.phone')}</p>
                                 </div>
                             </div>
                         </div>
@@ -43,7 +47,7 @@ export default function ContactPage() {
                             <p>Siga-nos nas redes sociais para ficar por dentro das novidades:</p>
                             <div className="social-links">
                                 <a
-                                    href="https://www.instagram.com/fatimafelippe7?utm_source=qr&igsh=ZTUyeDhwcjlsem5h"
+                                    href={safeHttpUrl(get('contact.instagram'), SITE_DEFAULTS['contact.instagram'])}
                                     className="btn"
                                     target="_blank"
                                     rel="noopener noreferrer"

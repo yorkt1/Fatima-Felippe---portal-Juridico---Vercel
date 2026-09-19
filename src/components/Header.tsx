@@ -1,7 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 
 export default function Header() {
+    const { get } = useSiteSettings();
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
@@ -19,15 +21,15 @@ export default function Header() {
             <div className="container topbar">
                 <div className="brand">
                     <img
-                        src="https://res.cloudinary.com/dqewxdbfx/image/upload/v1768103475/ChatGPT_Image_11_de_jan._de_2026_00_50_34_liswp9.png"
+                        src={get('header.logo')}
                         alt="Logo"
                         className="logo"
                         style={{ width: '50px', height: '50px', objectFit: 'contain' }}
                     />
                     <div>
-                        <div style={{ fontWeight: 900, fontSize: '25px' }}>Fatima Felippe</div>
+                        <div style={{ fontWeight: 900, fontSize: '25px' }}>{get('header.name')}</div>
                         <div style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>
-                            Artigos, reflexões e notícias
+                            {get('header.tagline')}
                         </div>
                     </div>
                 </div>

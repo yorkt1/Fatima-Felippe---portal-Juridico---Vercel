@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import SkeletonCard from '../components/SkeletonCard';
 import ArticleCard from '../components/ArticleCard';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 
 
 // Hook que anima um número de 0 até `target` em `duration`ms
@@ -50,6 +51,7 @@ function AnimatedStat({ value, label }: { value: number; label: string }) {
 }
 
 export default function Home() {
+    const { get } = useSiteSettings();
     const [posts, setPosts] = useState<Article[]>([]);
     const [reflexoes, setReflexoes] = useState<Article[]>([]);
     const [noticias, setNoticias] = useState<Article[]>([]);
@@ -185,26 +187,16 @@ export default function Home() {
                         <div className="hero-image">
                             <div className="frame-rectangular">
                                 <img
-                                    src="https://res.cloudinary.com/dqewxdbfx/image/upload/v1758832833/WhatsApp_Image_2025-09-25_at_17.37.40-Photoroom_noiqhc.png"
+                                    src={get('home.image')}
                                     alt="Mulher representando o Direito"
                                 />
                             </div>
                         </div>
                         <div className="hero-text">
-                            <h1 style={{ textAlign: 'center' }}>Bem-vindo ao Portal Jurídico</h1>
-                            <p>
-                                Este é um espaço online para escrever, publicar e compartilhar conhecimentos na área do direito e matérias
-                                afins, com pessoas interessadas e conectadas a grande rede.
-                            </p>
-                            <p>
-                                Além de artigos, oferece reflexões que possam auxiliar a estimular pensamentos, fornecendo novas perspectivas
-                                do cotidiano para além do âmbito estritamente jurídico, bem como a notícia informativa que faz parte da
-                                educação e da construção do conhecimento, mantendo os leitores inteirados sobre assuntos que interessem ao seu dia a dia.
-                            </p>
-                            <p>
-                                Esperamos que você tenha acesso a informações precisas e relevantes para sua prática profissional,
-                                estudos ou vida pessoal.
-                            </p>
+                            <h1 style={{ textAlign: 'center' }}>{get('home.title')}</h1>
+                            <p>{get('home.p1')}</p>
+                            <p>{get('home.p2')}</p>
+                            <p>{get('home.p3')}</p>
                             <div className="hero-stats">
                                 <AnimatedStat value={Math.floor(totalContent * 0.9)} label="Artigos Publicados" />
                                 <AnimatedStat value={totalTopics} label="Tópicos Abordados" />
