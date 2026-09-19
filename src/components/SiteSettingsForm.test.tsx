@@ -101,4 +101,30 @@ describe('SiteSettingsForm', () => {
 
         expect(await screen.findByText(/Erro ao salvar/)).toBeInTheDocument();
     });
+
+    it('deixa os contadores no modo automático inicialmente e aceita um valor personalizado', async () => {
+        const user = userEvent.setup();
+        render(<SiteSettingsForm onClose={vi.fn()} />);
+
+        await screen.findByLabelText(/Título de boas-vindas/);
+        await user.click(screen.getByText('Página inicial'));
+
+        const mode = screen.getByLabelText('Artigos publicados');
+        expect(mode).toHaveValue('automatic');
+        expect(screen.queryByLabelText('Número personalizado de artigos publicados')).not.toBeInTheDocument();
+
+        await user.selectOptions(mode, 'custom');
+        const value = screen.getByLabelText('Número personalizado de artigos publicados');
+        await user.clear(value);
+        await user.type(value, '30');
+        await user.click(screen.getByRole('button', { name: /Salvar alterações/ }));
+
+        await waitFor(() => expect(mocks.upsert).toHaveBeenCalledWith(
+            [
+                { key: 'home.stats.published.mode', value: 'custom', updated_at: expect.any(String) },
+                { key: 'home.stats.published.value', value: '30', updated_at: expect.any(String) },
+            ],
+            { onConflict: 'key' }
+        ));
+    });
 });

@@ -6,6 +6,7 @@ import SkeletonCard from '../components/SkeletonCard';
 import ArticleCard from '../components/ArticleCard';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 import { categoryClass } from '../utils/category';
+import { resolveStatValue } from '../utils/stats';
 
 
 // Hook que anima um número de 0 até `target` em `duration`ms
@@ -115,17 +116,23 @@ export default function Home() {
         ? posts.filter(p => p.id !== leadArticle.id)
         : posts;
 
-    // Total de conteúdo (artigos + reflexões + notícias)
-    const totalContent = posts.length + reflexoes.length + noticias.length;
+    const allContent = [...posts, ...reflexoes, ...noticias];
 
-    // Tópicos únicos abordados nos artigos
-    const totalTopics = new Set(posts.flatMap(p => p.tags || [])).size;
+    // Total de conteúdo publicado no portal (artigos + reflexões + notícias).
+    const totalContent = allContent.length;
+
+    // Tópicos únicos abordados em todo o conteúdo publicado.
+    const totalTopics = new Set(allContent.flatMap(p => p.tags || [])).size;
 
     // Soma dos minutos de leitura de todo o conteúdo (ex.: "10 min de leitura" -> 10)
-    const totalReadingMinutes = [...posts, ...reflexoes, ...noticias].reduce(
+    const totalReadingMinutes = allContent.reduce(
         (total, item) => total + (parseInt(item.readTime, 10) || 0),
         0
     );
+
+    const publishedStat = resolveStatValue(get('home.stats.published.mode'), get('home.stats.published.value'), totalContent);
+    const topicsStat = resolveStatValue(get('home.stats.topics.mode'), get('home.stats.topics.value'), totalTopics);
+    const minutesStat = resolveStatValue(get('home.stats.minutes.mode'), get('home.stats.minutes.value'), totalReadingMinutes);
 
     const paginate = (items: Article[], currentPage: number) => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -202,9 +209,9 @@ export default function Home() {
                             <p>{get('home.p2')}</p>
                             <p>{get('home.p3')}</p>
                             <div className="hero-stats">
-                                <AnimatedStat value={Math.floor(totalContent * 0.9)} label="Artigos Publicados" />
-                                <AnimatedStat value={totalTopics} label="Tópicos Abordados" />
-                                <AnimatedStat value={Math.floor(totalReadingMinutes * 0.9)} label="Minutos de Leitura" />
+                                <AnimatedStat value={publishedStat} label="Artigos Publicados" />
+                                <AnimatedStat value={topicsStat} label="Tópicos Abordados" />
+                                <AnimatedStat value={minutesStat} label="Minutos de Leitura" />
                             </div>
                         </div>
                     </div>

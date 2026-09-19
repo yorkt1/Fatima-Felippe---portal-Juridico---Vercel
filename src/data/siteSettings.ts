@@ -2,7 +2,12 @@
 // Os valores daqui são os PADRÕES: enquanto nada for salvo na tabela
 // `site_settings` do Supabase, o site mostra exatamente estes textos.
 
-export type SettingKind = 'text' | 'textarea' | 'image' | 'lines' | 'pairs';
+export type SettingKind = 'text' | 'textarea' | 'image' | 'lines' | 'pairs' | 'select' | 'number';
+
+interface SettingOption {
+    value: string;
+    label: string;
+}
 
 export interface SettingField {
     key: string;
@@ -11,6 +16,8 @@ export interface SettingField {
     kind: SettingKind;
     default: string;
     help?: string;
+    options?: SettingOption[];
+    visibleWhen?: { key: string; equals: string };
 }
 
 const HELP_LINES = 'Um item por linha.';
@@ -33,6 +40,32 @@ export const SITE_SETTING_FIELDS: SettingField[] = [
         default: 'Além de artigos, oferece reflexões que possam auxiliar a estimular pensamentos, fornecendo novas perspectivas do cotidiano para além do âmbito estritamente jurídico, bem como a notícia informativa que faz parte da educação e da construção do conhecimento, mantendo os leitores inteirados sobre assuntos que interessem ao seu dia a dia.' },
     { key: 'home.p3', group: 'Página inicial', label: 'Texto de boas-vindas — parágrafo 3', kind: 'textarea',
         default: 'Esperamos que você tenha acesso a informações precisas e relevantes para sua prática profissional, estudos ou vida pessoal.' },
+
+    // ── Contadores da página inicial ────────────────────────────
+    { key: 'home.stats.published.mode', group: 'Página inicial', label: 'Artigos publicados', kind: 'select', default: 'automatic',
+        options: [
+            { value: 'automatic', label: 'Automático — conta o conteúdo publicado' },
+            { value: 'custom', label: 'Personalizado — definir o número' },
+        ],
+        help: 'No modo automático, o número é atualizado quando o conteúdo do portal muda.' },
+    { key: 'home.stats.published.value', group: 'Página inicial', label: 'Número personalizado de artigos publicados', kind: 'number', default: '0',
+        visibleWhen: { key: 'home.stats.published.mode', equals: 'custom' }, help: 'Use um número inteiro igual ou maior que zero.' },
+    { key: 'home.stats.topics.mode', group: 'Página inicial', label: 'Tópicos abordados', kind: 'select', default: 'automatic',
+        options: [
+            { value: 'automatic', label: 'Automático — conta as tags únicas' },
+            { value: 'custom', label: 'Personalizado — definir o número' },
+        ],
+        help: 'No modo automático, as tags de todos os conteúdos são consideradas.' },
+    { key: 'home.stats.topics.value', group: 'Página inicial', label: 'Número personalizado de tópicos', kind: 'number', default: '0',
+        visibleWhen: { key: 'home.stats.topics.mode', equals: 'custom' }, help: 'Use um número inteiro igual ou maior que zero.' },
+    { key: 'home.stats.minutes.mode', group: 'Página inicial', label: 'Minutos de leitura', kind: 'select', default: 'automatic',
+        options: [
+            { value: 'automatic', label: 'Automático — soma o tempo de leitura' },
+            { value: 'custom', label: 'Personalizado — definir o número' },
+        ],
+        help: 'No modo automático, os tempos de leitura de todo o conteúdo são somados.' },
+    { key: 'home.stats.minutes.value', group: 'Página inicial', label: 'Número personalizado de minutos de leitura', kind: 'number', default: '0',
+        visibleWhen: { key: 'home.stats.minutes.mode', equals: 'custom' }, help: 'Use um número inteiro igual ou maior que zero.' },
 
     // ── Sobre ──────────────────────────────────────────────────
     { key: 'about.title', group: 'Sobre', label: 'Título da página', kind: 'text', default: 'Sobre Fátima T Felippe' },

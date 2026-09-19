@@ -114,7 +114,7 @@ describe('Home — layout igual ao original', () => {
         expect(screen.getByRole('link', { name: 'Política de Privacidade' })).toBeInTheDocument();
     });
 
-    it('contadores do hero seguem a fórmula do original (34 itens → +30 artigos)', async () => {
+    it('contadores do hero ficam automáticos por padrão e usam os totais reais', async () => {
         // No jsdom o relógio do requestAnimationFrame não bate com o performance.now();
         // aqui a animação é "adiantada" para o valor final, só para testar a conta.
         const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(
@@ -123,11 +123,10 @@ describe('Home — layout igual ao original', () => {
         try {
             const { container } = setup();
             await screen.findByRole('heading', { name: 'Título 1', level: 1 });
-            // 24 + 7 + 3 = 34 → floor(34 × 0,9) = 30 ; tópicos = tags únicas dos artigos = 24 ;
-            // minutos: 34 × 10 = 340 → floor(340 × 0,9) = 306
+            // 24 + 7 + 3 = 34; cada item tem uma tag distinta e 10 minutos.
             await waitFor(() => {
                 const nums = [...container.querySelectorAll('.stat-number')].map(n => n.textContent);
-                expect(nums).toEqual(['+30', '+24', '+306']);
+                expect(nums).toEqual(['+34', '+34', '+340']);
             }, { timeout: 3000 });
         } finally {
             raf.mockRestore();

@@ -148,6 +148,9 @@ export default function SiteSettingsForm({ onClose }: SiteSettingsFormProps) {
 
     const requestClose = () => (dirtyCount > 0 ? setConfirmDiscard(true) : onClose());
 
+    const isVisible = (f: SettingField) =>
+        !f.visibleWhen || values[f.visibleWhen.key] === f.visibleWhen.equals;
+
     const renderField = (f: SettingField) => {
         const id = `site-${f.key}`;
         const value = values[f.key] ?? f.default;
@@ -168,6 +171,16 @@ export default function SiteSettingsForm({ onClose }: SiteSettingsFormProps) {
 
                 {f.kind === 'text' && (
                     <input id={id} type="text" className="adm-input" value={value}
+                        onChange={e => setValue(f.key, e.target.value)} />
+                )}
+                {f.kind === 'select' && (
+                    <select id={id} className="adm-select" value={value}
+                        onChange={e => setValue(f.key, e.target.value)}>
+                        {f.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                )}
+                {f.kind === 'number' && (
+                    <input id={id} type="number" min="0" step="1" inputMode="numeric" className="adm-input" value={value}
                         onChange={e => setValue(f.key, e.target.value)} />
                 )}
                 {(f.kind === 'textarea' || f.kind === 'lines' || f.kind === 'pairs') && (
@@ -261,7 +274,7 @@ export default function SiteSettingsForm({ onClose }: SiteSettingsFormProps) {
                                                 <ChevronDown size={18} className="adm-acc__chev" aria-hidden="true" />
                                             </span>
                                         </summary>
-                                        <div className="adm-acc__body">{fields.map(renderField)}</div>
+                                        <div className="adm-acc__body">{fields.filter(isVisible).map(renderField)}</div>
                                     </details>
                                 );
                             })}
