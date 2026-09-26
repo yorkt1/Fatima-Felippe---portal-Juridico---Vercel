@@ -5,6 +5,7 @@ import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { parseLines } from '../utils/siteText';
 import { categoryClass } from '../utils/category';
 
@@ -13,6 +14,12 @@ export default function ArtigosPage() {
     const { get } = useSiteSettings();
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+
+    useDocumentMeta(
+        'Artigos — Fatima Felippe | Portal Jurídico',
+        'Todos os artigos jurídicos publicados por Fatima Felippe: Direito Civil, Trabalhista e outras áreas do Direito.',
+        { path: '/artigos', type: 'website' }
+    );
 
     useEffect(() => {
         const fetchArticles = async () => {
@@ -73,7 +80,7 @@ export default function ArtigosPage() {
                                 {articles.slice(0, 3).map((article) => (
                                     <li key={article.id}>
                                         <Link to={`/artigo/${article.id}`}>
-                                            <span className={`category ${categoryClass(article.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                            <span className={`category ${categoryClass(article.categoryName)}`} style={{ fontSize: '12px', padding: '2px 6px' }}>
                                                 {article.categoryName.split(' ')[0]}
                                             </span>{' '}
                                             {article.title}

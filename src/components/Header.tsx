@@ -33,13 +33,15 @@ export default function Header() {
                     className={`menu-toggle ${menuOpen ? 'active' : ''}`}
                     onClick={() => setMenuOpen(!menuOpen)}
                     aria-label="Abrir menu"
+                    aria-expanded={menuOpen}
+                    aria-controls="main-nav"
                 >
                     <span></span>
                     <span></span>
                     <span></span>
                 </button>
 
-                <nav className={`main-nav ${menuOpen ? 'active' : ''}`} aria-label="menu">
+                <nav id="main-nav" className={`main-nav ${menuOpen ? 'active' : ''}`} aria-label="menu">
                     <NavLink to="/" end onClick={() => setMenuOpen(false)}>Home</NavLink>
                     <NavLink to="/artigos" onClick={() => setMenuOpen(false)}>Artigos</NavLink>
                     <NavLink to="/reflexoes" onClick={() => setMenuOpen(false)}>Reflexões</NavLink>

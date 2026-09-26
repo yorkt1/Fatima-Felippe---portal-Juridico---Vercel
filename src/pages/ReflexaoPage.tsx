@@ -45,8 +45,24 @@ export default function ReflexaoPage() {
     }, [id]);
 
     useDocumentMeta(
-        reflexao ? `${reflexao.title} — Fatima Felippe` : undefined,
-        reflexao?.excerpt
+        reflexao ? `${reflexao.title} — Fatima Felippe` : (!loading ? 'Reflexão não encontrada — Fatima Felippe' : undefined),
+        reflexao?.excerpt,
+        {
+            path: id ? `/reflexao/${id}` : undefined,
+            image: reflexao?.image,
+            type: 'article',
+            noindex: !loading && !reflexao,
+            structuredData: reflexao ? {
+                '@context': 'https://schema.org',
+                '@type': 'Article',
+                headline: reflexao.title,
+                description: reflexao.excerpt,
+                image: reflexao.image ? [reflexao.image] : undefined,
+                author: { '@type': 'Person', name: reflexao.author },
+                publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
+                mainEntityOfPage: `https://fatimafelippe.com.br/reflexao/${id}`,
+            } : undefined,
+        }
     );
 
     if (loading) {

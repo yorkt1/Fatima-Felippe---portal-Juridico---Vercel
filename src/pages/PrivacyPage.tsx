@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
 export default function PrivacyPage() {
+    useDocumentMeta(
+        'Política de Privacidade — Portal Jurídico Fátima Felippe',
+        'Política de Privacidade do Portal Jurídico Fatima Felippe: como coletamos, usamos e protegemos os dados dos visitantes.',
+        { path: '/privacidade', type: 'website' }
+    );
+
     useEffect(() => {
-        document.title = 'Política de Privacidade — Portal Jurídico Fátima Felippe';
         window.scrollTo(0, 0);
     }, []);
 

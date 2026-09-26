@@ -4,12 +4,19 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { categoryClass } from '../utils/category';
 
 
 export default function ReflexoesPage() {
     const [reflexoes, setReflexoes] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+
+    useDocumentMeta(
+        'Reflexões — Fatima Felippe | Portal Jurídico',
+        'Reflexões sobre Direito e o cotidiano, com novas perspectivas para além do âmbito estritamente jurídico.',
+        { path: '/reflexoes', type: 'website' }
+    );
 
     useEffect(() => {
         const fetchReflexoes = async () => {
@@ -60,7 +67,7 @@ export default function ReflexoesPage() {
                                 {reflexoes.slice(0, 3).map((reflexao) => (
                                     <li key={reflexao.id}>
                                         <Link to={`/reflexao/${reflexao.id}`}>
-                                            <span className={`category ${categoryClass(reflexao.categoryName, true)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                            <span className={`category ${categoryClass(reflexao.categoryName, true)}`} style={{ fontSize: '12px', padding: '2px 6px' }}>
                                                 {reflexao.categoryName.split(' ')[0]}
                                             </span>{' '}
                                             {reflexao.title}

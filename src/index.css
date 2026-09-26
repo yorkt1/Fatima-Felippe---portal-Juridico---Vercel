@@ -24,7 +24,6 @@ body {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
     background: var(--bg);
     color: #111;
     scroll-behavior: smooth;
@@ -43,6 +42,7 @@ header {
 }
 
 .container {
+    width: 100%;
     max-width: var(--maxwidth);
     margin: 0 auto;
     padding: 18px
@@ -108,9 +108,11 @@ nav.main-nav a.active {
 .menu-toggle {
     display: none;
     flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 21px;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -121,14 +123,14 @@ nav.main-nav a.active {
 .menu-toggle span {
     display: block;
     height: 3px;
-    width: 100%;
+    width: 26px;
     background-color: var(--accent);
     border-radius: 3px;
     transition: all 0.3s ease;
 }
 
 .menu-toggle.active span:nth-child(1) {
-    transform: translateY(9px) rotate(45deg);
+    transform: translateY(8px) rotate(45deg);
 }
 
 .menu-toggle.active span:nth-child(2) {
@@ -136,7 +138,7 @@ nav.main-nav a.active {
 }
 
 .menu-toggle.active span:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg);
+    transform: translateY(-8px) rotate(-45deg);
 }
 
 /* Categorias */
@@ -184,7 +186,7 @@ nav.main-nav a.active {
     border-radius: 8px
 }
 
-.lead-article h1 {
+.lead-article h2 {
     margin: 12px 0 6px;
     font-size: 22px
 }
@@ -248,6 +250,14 @@ nav.main-nav a.active {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px
+}
+
+/* Impede que imagens/links empurrem a largura dos itens de grid além da
+   coluna disponível (min-width dos itens de grid é "auto" por padrão). */
+.hero>*,
+.main>*,
+.posts>* {
+    min-width: 0;
 }
 
 .post {
@@ -336,6 +346,29 @@ footer {
     padding: 22px 0;
     color: var(--muted);
     font-size: 14px
+}
+
+footer small {
+    font-size: 13px;
+}
+
+/* Área de toque dos links do rodapé: mantém o texto pequeno no visual, mas
+   garante pelo menos 44px de altura clicável/tocável (WCAG 2.5.5). */
+footer a {
+    position: relative;
+    display: inline-block;
+}
+
+footer a::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
 }
 
 /* Article page */
@@ -700,6 +733,7 @@ body.overlay-open {
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
     margin: 18px 0;
@@ -1023,15 +1057,15 @@ body.overlay-open {
 /* Responsive */
 @media (max-width: 900px) {
     .hero {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .main {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .posts {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .search input {
@@ -1064,7 +1098,7 @@ body.overlay-open {
     nav.main-nav {
         position: fixed;
         top: 0;
-        right: -100%;
+        right: 0;
         width: 80%;
         max-width: 300px;
         height: 100vh;
@@ -1073,13 +1107,17 @@ body.overlay-open {
         align-items: flex-start;
         padding: 80px 20px 20px;
         box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-        transition: right 0.3s ease;
+        transform: translateX(100%);
+        visibility: hidden;
+        transition: transform 0.3s ease, visibility 0s linear 0.3s;
         z-index: 9;
         gap: 0;
     }
 
     nav.main-nav.active {
-        right: 0;
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform 0.3s ease;
     }
 
     nav.main-nav a {
@@ -1187,12 +1225,12 @@ body.overlay-open {
     /* Grid Layouts Stack */
     .hero,
     .main {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 20px;
     }
 
     .posts {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     /* Empilhar sidebar em mobile */

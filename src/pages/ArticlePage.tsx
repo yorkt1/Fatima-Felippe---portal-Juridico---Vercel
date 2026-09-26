@@ -45,8 +45,24 @@ export default function ArticlePage() {
     }, [id]);
 
     useDocumentMeta(
-        article ? `${article.title} — Fatima Felippe` : undefined,
-        article?.excerpt
+        article ? `${article.title} — Fatima Felippe` : (!loading ? 'Artigo não encontrado — Fatima Felippe' : undefined),
+        article?.excerpt,
+        {
+            path: id ? `/artigo/${id}` : undefined,
+            image: article?.image,
+            type: 'article',
+            noindex: !loading && !article,
+            structuredData: article ? {
+                '@context': 'https://schema.org',
+                '@type': 'Article',
+                headline: article.title,
+                description: article.excerpt,
+                image: article.image ? [article.image] : undefined,
+                author: { '@type': 'Person', name: article.author },
+                publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
+                mainEntityOfPage: `https://fatimafelippe.com.br/artigo/${id}`,
+            } : undefined,
+        }
     );
 
     if (loading) {

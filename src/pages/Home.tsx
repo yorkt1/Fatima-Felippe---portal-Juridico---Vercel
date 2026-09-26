@@ -272,7 +272,7 @@ export default function Home() {
                                     />
                                 </Link>
                                 <Link to={`/artigo/${leadArticle.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                    <h1>{leadArticle.title}</h1>
+                                    <h2>{leadArticle.title}</h2>
                                 </Link>
                                 <p className="excerpt">{leadArticle.excerpt}</p>
                                 <div style={{ marginTop: '12px' }}>
@@ -335,7 +335,7 @@ export default function Home() {
                                 {posts.slice(0, 3).map((post) => (
                                     <li key={post.id}>
                                         <Link to={`/artigo/${post.id}`}>
-                                            <span className={`category ${categoryClass(post.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{post.categoryName.split(' ')[0]}</span>{' '}
+                                            <span className={`category ${categoryClass(post.categoryName)}`} style={{ fontSize: '12px', padding: '2px 6px' }}>{post.categoryName.split(' ')[0]}</span>{' '}
                                             {post.title}
                                         </Link>
                                     </li>
@@ -373,7 +373,7 @@ export default function Home() {
                                 {reflexoes.slice(0, 3).map((reflexao) => (
                                     <li key={reflexao.id}>
                                         <Link to={`/reflexao/${reflexao.id}`}>
-                                            <span className={`category ${categoryClass(reflexao.categoryName, true)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{reflexao.categoryName.split(' ')[0]}</span>{' '}
+                                            <span className={`category ${categoryClass(reflexao.categoryName, true)}`} style={{ fontSize: '12px', padding: '2px 6px' }}>{reflexao.categoryName.split(' ')[0]}</span>{' '}
                                             {reflexao.title}
                                         </Link>
                                     </li>
@@ -415,7 +415,7 @@ export default function Home() {
                                 {noticias.slice(0, 3).map((noticia) => (
                                     <li key={noticia.id}>
                                         <Link to={`/noticia/${noticia.id}`}>
-                                            <span className={`category ${categoryClass(noticia.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{noticia.categoryName.split(' ')[0]}</span>{' '}
+                                            <span className={`category ${categoryClass(noticia.categoryName)}`} style={{ fontSize: '12px', padding: '2px 6px' }}>{noticia.categoryName.split(' ')[0]}</span>{' '}
                                             {noticia.title}
                                         </Link>
                                     </li>

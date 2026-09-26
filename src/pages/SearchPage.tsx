@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import type { Article } from '../data/content';
 import { normalize, tokenize, matchesAllTokens } from '../utils/search';
 import { categoryClass } from '../utils/category';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
 // Destaca os termos encontrados em um texto puro
 function Highlight({ text, tokens }: { text: string; tokens: string[] }) {
@@ -71,6 +72,14 @@ export default function SearchPage() {
     const [results, setResults] = useState<GroupedResults>({ artigos: [], reflexoes: [], noticias: [] });
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
+
+    // Resultados de busca interna são conteúdo dinâmico/fino e não devem ser
+    // indexados (evita diluir o índice com páginas de baixa qualidade).
+    useDocumentMeta(
+        query ? `Busca: "${query}" — Fatima Felippe` : 'Busca — Fatima Felippe',
+        'Resultados de busca no Portal Jurídico Fatima Felippe.',
+        { type: 'website', noindex: true }
+    );
 
     const fetchAndFilter = useCallback(async (q: string) => {
         if (!q.trim()) {

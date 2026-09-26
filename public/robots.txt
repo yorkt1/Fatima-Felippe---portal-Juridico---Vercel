@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /busca
 
 Sitemap: https://fatimafelippe.com.br/sitemap.xml

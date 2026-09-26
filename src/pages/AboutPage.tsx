@@ -1,12 +1,18 @@
 import { useEffect } from 'react';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { parseLines, parsePairs } from '../utils/siteText';
 
 export default function AboutPage() {
     const { get } = useSiteSettings();
 
+    useDocumentMeta(
+        'Sobre — Fátima Felippe | Portal Jurídico',
+        get('about.subtitle'),
+        { path: '/sobre', type: 'website' }
+    );
+
     useEffect(() => {
-        document.title = 'Sobre — Fátima Felippe | Portal Jurídico';
         window.scrollTo(0, 0);
     }, []);
 

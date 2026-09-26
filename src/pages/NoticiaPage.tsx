@@ -45,8 +45,24 @@ export default function NoticiaPage() {
     }, [id]);
 
     useDocumentMeta(
-        noticia ? `${noticia.title} — Fatima Felippe` : undefined,
-        noticia?.excerpt
+        noticia ? `${noticia.title} — Fatima Felippe` : (!loading ? 'Notícia não encontrada — Fatima Felippe' : undefined),
+        noticia?.excerpt,
+        {
+            path: id ? `/noticia/${id}` : undefined,
+            image: noticia?.image,
+            type: 'article',
+            noindex: !loading && !noticia,
+            structuredData: noticia ? {
+                '@context': 'https://schema.org',
+                '@type': 'NewsArticle',
+                headline: noticia.title,
+                description: noticia.excerpt,
+                image: noticia.image ? [noticia.image] : undefined,
+                author: { '@type': 'Person', name: noticia.author },
+                publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
+                mainEntityOfPage: `https://fatimafelippe.com.br/noticia/${id}`,
+            } : undefined,
+        }
     );
 
     if (loading) {

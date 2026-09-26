@@ -1,12 +1,19 @@
 import { useEffect } from 'react';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { SITE_DEFAULTS } from '../data/siteSettings';
 import { safeHttpUrl } from '../utils/siteText';
 
 export default function ContactPage() {
     const { get } = useSiteSettings();
+
+    useDocumentMeta(
+        'Contato — Portal Jurídico Fátima Felippe',
+        'Entre em contato com Fatima Felippe: e-mail, telefone e redes sociais do Portal Jurídico.',
+        { path: '/contato', type: 'website' }
+    );
+
     useEffect(() => {
-        document.title = 'Contato — Portal Jurídico Fátima Felippe';
         window.scrollTo(0, 0);
     }, []);
 

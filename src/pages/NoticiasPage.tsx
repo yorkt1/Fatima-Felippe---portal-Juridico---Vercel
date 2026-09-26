@@ -5,6 +5,7 @@ import type { Article } from '../data/content';
 import ArticleCard from '../components/ArticleCard';
 import SkeletonCard from '../components/SkeletonCard';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { parseLines } from '../utils/siteText';
 import { categoryClass } from '../utils/category';
 
@@ -13,6 +14,12 @@ export default function NoticiasPage() {
     const { get } = useSiteSettings();
     const [noticias, setNoticias] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
+
+    useDocumentMeta(
+        'Notícias — Fatima Felippe | Portal Jurídico',
+        'Notícias jurídicas selecionadas por Fatima Felippe para manter você informado sobre o mundo do Direito.',
+        { path: '/noticias', type: 'website' }
+    );
 
     useEffect(() => {
         const fetchNoticias = async () => {
@@ -79,7 +86,7 @@ export default function NoticiasPage() {
                                 {noticias.slice(0, 3).map((article) => (
                                     <li key={article.id}>
                                         <Link to={`/noticia/${article.id}`}>
-                                            <span className={`category ${categoryClass(article.categoryName)}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
+                                            <span className={`category ${categoryClass(article.categoryName)}`} style={{ fontSize: '12px', padding: '2px 6px' }}>
                                                 {article.categoryName.split(' ')[0]}
                                             </span>{' '}
                                             {article.title}

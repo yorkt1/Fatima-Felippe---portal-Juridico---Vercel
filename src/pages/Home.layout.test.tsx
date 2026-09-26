@@ -52,7 +52,7 @@ function setup() {
 describe('Home — layout igual ao original', () => {
     it('header: sem position sticky e logo "FF" como quadrado de texto', async () => {
         const { container } = setup();
-        await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+        await screen.findByRole('heading', { name: 'Título 1', level: 2 });
         const header = container.querySelector('header') as HTMLElement;
         expect(header.style.position).not.toBe('sticky');
         const logo = header.querySelector('.brand .logo') as HTMLElement;
@@ -63,7 +63,7 @@ describe('Home — layout igual ao original', () => {
 
     it('header: título com peso 1000 e botão "Ir" sem padding próprio (usa o .btn)', async () => {
         const { container } = setup();
-        await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+        await screen.findByRole('heading', { name: 'Título 1', level: 2 });
         const title = screen.getByText('Fatima Felippe');
         expect(title.style.fontWeight).toBe('1000');
         const ir = container.querySelector('.search .btn') as HTMLElement;
@@ -71,23 +71,24 @@ describe('Home — layout igual ao original', () => {
         expect(ir.getAttribute('style')).toBeNull();
     });
 
-    it('destaque: título é <h1> e o resumo usa a classe .excerpt', async () => {
+    it('destaque: título é <h2> (a página só tem um <h1>) e o resumo usa a classe .excerpt', async () => {
         const { container } = setup();
-        const h1 = await screen.findByRole('heading', { name: 'Título 1', level: 1 });
-        expect(within(container.querySelector('.lead-article') as HTMLElement).getByRole('heading', { level: 1 })).toBe(h1);
+        const h2 = await screen.findByRole('heading', { name: 'Título 1', level: 2 });
+        expect(within(container.querySelector('.lead-article') as HTMLElement).getByRole('heading', { level: 2 })).toBe(h2);
+        expect(container.querySelectorAll('h1')).toHaveLength(1);
         expect(container.querySelector('.lead-article p.excerpt')).toHaveTextContent('Resumo 1');
     });
 
     it('cards laterais: título h4 sem font-size próprio (16px padrão)', async () => {
         const { container } = setup();
-        await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+        await screen.findByRole('heading', { name: 'Título 1', level: 2 });
         const h4 = container.querySelector('.card-small h4') as HTMLElement;
         expect(h4.style.fontSize).toBe('');
     });
 
     it('chips: só Direito Civil e Reflexões ganham classe azul; as demais usam o padrão', async () => {
         const { container } = setup();
-        await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+        await screen.findByRole('heading', { name: 'Título 1', level: 2 });
         const chips = [...container.querySelectorAll('.category')];
         const lead = container.querySelector('.lead-article .category') as HTMLElement;
         expect(lead.className).toContain('direito-civil');
@@ -99,7 +100,7 @@ describe('Home — layout igual ao original', () => {
 
     it('paginação: lista todas as páginas (23 artigos fora o destaque = 6 páginas) e aparece mesmo com 1 página só', async () => {
         const { container } = setup();
-        await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+        await screen.findByRole('heading', { name: 'Título 1', level: 2 });
         await waitFor(() => expect(container.querySelectorAll('.pagination').length).toBe(3));
         const [artigos, reflexoes, noticias] = [...container.querySelectorAll('.pagination')].map(p => [...p.querySelectorAll('button')].map(b => b.textContent));
         expect(artigos).toEqual(['« Anterior', '1', '2', '3', '4', '5', '6', 'Próxima »']);
@@ -109,7 +110,7 @@ describe('Home — layout igual ao original', () => {
 
     it('rodapé: sem o botão "Área de desenvolvimento" e com o link de privacidade', async () => {
         setup();
-        await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+        await screen.findByRole('heading', { name: 'Título 1', level: 2 });
         expect(screen.queryByText('Área de desenvolvimento')).toBeNull();
         expect(screen.getByRole('link', { name: 'Política de Privacidade' })).toBeInTheDocument();
     });
@@ -122,7 +123,7 @@ describe('Home — layout igual ao original', () => {
         );
         try {
             const { container } = setup();
-            await screen.findByRole('heading', { name: 'Título 1', level: 1 });
+            await screen.findByRole('heading', { name: 'Título 1', level: 2 });
             // 24 + 7 + 3 = 34; cada item tem uma tag distinta e 10 minutos.
             await waitFor(() => {
                 const nums = [...container.querySelectorAll('.stat-number')].map(n => n.textContent);
