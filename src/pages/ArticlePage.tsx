@@ -52,16 +52,29 @@ export default function ArticlePage() {
             image: article?.image,
             type: 'article',
             noindex: !loading && !article,
-            structuredData: article ? {
-                '@context': 'https://schema.org',
-                '@type': 'Article',
-                headline: article.title,
-                description: article.excerpt,
-                image: article.image ? [article.image] : undefined,
-                author: { '@type': 'Person', name: article.author },
-                publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
-                mainEntityOfPage: `https://fatimafelippe.com.br/artigo/${id}`,
-            } : undefined,
+            // BreadcrumbList: mostra a categoria (ex.: "Saúde") no resultado de busca do
+            // Google no lugar da URL crua "/artigo/51", como o Jusbrasil faz.
+            structuredData: article ? [
+                {
+                    '@context': 'https://schema.org',
+                    '@type': 'Article',
+                    headline: article.title,
+                    description: article.excerpt,
+                    image: article.image ? [article.image] : undefined,
+                    author: { '@type': 'Person', name: article.author },
+                    publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
+                    mainEntityOfPage: `https://fatimafelippe.com.br/artigo/${id}`,
+                },
+                {
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://fatimafelippe.com.br/' },
+                        { '@type': 'ListItem', position: 2, name: article.categoryName, item: 'https://fatimafelippe.com.br/artigos' },
+                        { '@type': 'ListItem', position: 3, name: article.title, item: `https://fatimafelippe.com.br/artigo/${id}` },
+                    ],
+                },
+            ] : undefined,
         }
     );
 

@@ -52,16 +52,29 @@ export default function ReflexaoPage() {
             image: reflexao?.image,
             type: 'article',
             noindex: !loading && !reflexao,
-            structuredData: reflexao ? {
-                '@context': 'https://schema.org',
-                '@type': 'Article',
-                headline: reflexao.title,
-                description: reflexao.excerpt,
-                image: reflexao.image ? [reflexao.image] : undefined,
-                author: { '@type': 'Person', name: reflexao.author },
-                publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
-                mainEntityOfPage: `https://fatimafelippe.com.br/reflexao/${id}`,
-            } : undefined,
+            // BreadcrumbList: mostra a categoria no resultado de busca do Google no
+            // lugar da URL crua "/reflexao/12", como o Jusbrasil faz.
+            structuredData: reflexao ? [
+                {
+                    '@context': 'https://schema.org',
+                    '@type': 'Article',
+                    headline: reflexao.title,
+                    description: reflexao.excerpt,
+                    image: reflexao.image ? [reflexao.image] : undefined,
+                    author: { '@type': 'Person', name: reflexao.author },
+                    publisher: { '@type': 'Organization', name: 'Portal Jurídico Fatima Felippe' },
+                    mainEntityOfPage: `https://fatimafelippe.com.br/reflexao/${id}`,
+                },
+                {
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://fatimafelippe.com.br/' },
+                        { '@type': 'ListItem', position: 2, name: reflexao.categoryName, item: 'https://fatimafelippe.com.br/reflexoes' },
+                        { '@type': 'ListItem', position: 3, name: reflexao.title, item: `https://fatimafelippe.com.br/reflexao/${id}` },
+                    ],
+                },
+            ] : undefined,
         }
     );
 

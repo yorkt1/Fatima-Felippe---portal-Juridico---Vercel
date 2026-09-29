@@ -22,8 +22,9 @@ export interface DocumentMetaOptions {
     type?: 'website' | 'article';
     /** Marca a página como noindex (ex.: busca interna, conteúdo não encontrado). */
     noindex?: boolean;
-    /** Dados estruturados JSON-LD (schema.org) específicos da página. */
-    structuredData?: Record<string, unknown>;
+    /** Dados estruturados JSON-LD (schema.org) específicos da página. Aceita um objeto
+     *  único ou uma lista (ex.: Article + BreadcrumbList), serializados como array JSON-LD. */
+    structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 function setAttrTag(selector: string, make: () => HTMLElement, attr: string, value: string): () => void {
