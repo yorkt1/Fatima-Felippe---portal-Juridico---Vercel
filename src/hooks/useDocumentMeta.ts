@@ -94,6 +94,10 @@ export function useDocumentMeta(title?: string, description?: string, options: D
         ));
 
         if (structuredData) {
+            // Substitui o JSON-LD pré-renderizado no build (ver scripts/generate-prerender.mjs)
+            // para não duplicar o mesmo bloco assim que o React assume a página.
+            document.getElementById('prerendered-jsonld')?.remove();
+
             const script = document.createElement('script');
             script.type = 'application/ld+json';
             script.setAttribute('data-seo-jsonld', 'dynamic');

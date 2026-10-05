@@ -13,6 +13,7 @@ import SearchPage from './pages/SearchPage';
 import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
 import PrivacyPage from './pages/PrivacyPage';
+import NotFoundPage from './pages/NotFoundPage';
 import CookieConsent from './components/CookieConsent';
 import { useCopyProtection } from './hooks/useCopyProtection';
 import './App.css';
@@ -53,6 +54,7 @@ function AppShell() {
         <Route path="/contato" element={<ContactPage />} />
         <Route path="/sobre" element={<AboutPage />} />
         <Route path="/privacidade" element={<PrivacyPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       {!isAdmin && <Footer />}
       {!isAdmin && <CookieConsent />}

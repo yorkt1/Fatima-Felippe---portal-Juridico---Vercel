@@ -1,4 +1,46 @@
 {
+    "redirects": [
+        { "source": "/index.php", "destination": "/", "statusCode": 301 },
+        { "source": "/contato.html", "destination": "/contato", "statusCode": 301 },
+        { "source": "/privacidade.html", "destination": "/privacidade", "statusCode": 301 },
+
+        { "source": "/artigo/acao-declaratoria-de-constitucionalidade.html", "destination": "/artigo/19", "statusCode": 301 },
+        { "source": "/artigo/antecipacao-do-abono-anual-13-salario-do-inss.html", "destination": "/artigo/40", "statusCode": 301 },
+        { "source": "/artigo/auxilio-reclusao.html", "destination": "/artigo/31", "statusCode": 301 },
+        { "source": "/artigo/competencia-tributaria.html", "destination": "/artigo/29", "statusCode": 301 },
+        { "source": "/artigo/curatela-instrumento-de-protecao-e-cuidado-no-ordenamento-juridico.html", "destination": "/artigo/5", "statusCode": 301 },
+        { "source": "/artigo/dia-do-advogado-a-importancia-e-historia-da-advocacia-no-brasil.html", "destination": "/artigo/32", "statusCode": 301 },
+        { "source": "/artigo/dom-pedro-i.html", "destination": "/artigo/33", "statusCode": 301 },
+        { "source": "/artigo/dos-atos-processuais.html", "destination": "/artigo/21", "statusCode": 301 },
+        { "source": "/artigo/gratuidade-de-justica-i.html", "destination": "/artigo/23", "statusCode": 301 },
+        { "source": "/artigo/gratuidade-de-justica-ii.html", "destination": "/artigo/24", "statusCode": 301 },
+        { "source": "/artigo/isencao-do-imposto-de-renda-lei-n-15-270-2025-novo-teto.html", "destination": "/artigo/39", "statusCode": 301 },
+        { "source": "/artigo/o-estado-brasileiro.html", "destination": "/artigo/25", "statusCode": 301 },
+        { "source": "/artigo/obrigacao-tributaria.html", "destination": "/artigo/20", "statusCode": 301 },
+        { "source": "/artigo/orcamento-publico-i.html", "destination": "/artigo/17", "statusCode": 301 },
+        { "source": "/artigo/orcamento-publico-ii.html", "destination": "/artigo/18", "statusCode": 301 },
+        { "source": "/artigo/ordem-economica-e-financeira.html", "destination": "/artigo/28", "statusCode": 301 },
+        { "source": "/artigo/ordem-social-assistencia-social.html", "destination": "/artigo/27", "statusCode": 301 },
+        { "source": "/artigo/ordem-social-saude.html", "destination": "/artigo/30", "statusCode": 301 },
+        { "source": "/artigo/ordem-social-seguridade-social.html", "destination": "/artigo/26", "statusCode": 301 },
+        { "source": "/artigo/proposta-de-emenda-a-constituicao-pec-03-2026-altera-o-art-155-da.html", "destination": "/artigo/44", "statusCode": 301 },
+        { "source": "/artigo/proposta-de-emenda-a-constituicao-pec-19-2024-profissionais-da-saude.html", "destination": "/artigo/43", "statusCode": 301 },
+        { "source": "/artigo/taxa-de-licenciamento-anual-crlv-e.html", "destination": "/artigo/41", "statusCode": 301 },
+        { "source": "/artigo/tcc-especializacao-processo-civil.html", "destination": "/artigo/22", "statusCode": 301 },
+        { "source": "/artigo/tutela-protecao-integral-de-menores-no-ordenamento-juridico-brasileiro.html", "destination": "/artigo/6", "statusCode": 301 },
+
+        { "source": "/artigo/inteligencia.html", "destination": "/reflexao/11", "statusCode": 301 },
+        { "source": "/artigo/mudancas.html", "destination": "/reflexao/38", "statusCode": 301 },
+        { "source": "/artigo/o-poder-da-vontade.html", "destination": "/reflexao/45", "statusCode": 301 },
+        { "source": "/artigo/organizacao.html", "destination": "/reflexao/12", "statusCode": 301 },
+        { "source": "/artigo/pensamentos.html", "destination": "/reflexao/13", "statusCode": 301 },
+        { "source": "/artigo/reciprocidade.html", "destination": "/reflexao/4", "statusCode": 301 },
+        { "source": "/artigo/tolerancia.html", "destination": "/reflexao/35", "statusCode": 301 },
+
+        { "source": "/artigo/aprovado-o-fim-da-escala-de-trabalho-6x1-pela-ccj-do-senado-federal.html", "destination": "/noticia/36", "statusCode": 301 },
+        { "source": "/artigo/isencao-do-ipva.html", "destination": "/noticia/16", "statusCode": 301 },
+        { "source": "/artigo/retorno-dos-servicos-do-inss-apos-atualizacao-dos-sistemas.html", "destination": "/noticia/37", "statusCode": 301 }
+    ],
     "rewrites": [
         {
             "source": "/(.*)",
