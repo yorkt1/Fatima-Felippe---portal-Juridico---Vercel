@@ -55,9 +55,9 @@ const STATIC_PAGES = [
 ];
 
 const TYPE_CONFIG = {
-    artigos: { prefix: 'artigo', listPath: '/artigos', schemaType: 'Article' },
-    reflexoes: { prefix: 'reflexao', listPath: '/reflexoes', schemaType: 'Article' },
-    noticias: { prefix: 'noticia', listPath: '/noticias', schemaType: 'NewsArticle' },
+    artigos: { type: 'artigos', prefix: 'artigo', listPath: '/artigos', schemaType: 'Article' },
+    reflexoes: { type: 'reflexoes', prefix: 'reflexao', listPath: '/reflexoes', schemaType: 'Article' },
+    noticias: { type: 'noticias', prefix: 'noticia', listPath: '/noticias', schemaType: 'NewsArticle' },
 };
 
 async function supabaseGet(path) {
@@ -141,18 +141,40 @@ async function main() {
     const settingsRows = await supabaseGet('/rest/v1/site_settings?select=key,value');
     const settings = Object.fromEntries((settingsRows || []).map(r => [r.key, r.value]).filter(([, v]) => v));
     const aboutSubtitle = settings['about.subtitle'] || ABOUT_SUBTITLE_DEFAULT;
+    const rows = await supabaseGet('/rest/v1/contents?select=id,type,title,excerpt,image,categoryName,author,date') || [];
 
     for (const page of STATIC_PAGES) {
-        const html = buildHead(template, {
+        let html = buildHead(template, {
             title: page.title,
             description: page.path === '/sobre' ? aboutSubtitle : page.description,
             canonicalPath: page.path,
             type: 'website',
         });
+
+        const listConfig = Object.values(TYPE_CONFIG).find(config => config.listPath === page.path);
+        if (listConfig) {
+            const items = rows
+                .filter(row => row.type === listConfig.type && row.id != null && row.title)
+                .map(row => {
+                    const path = `/${listConfig.prefix}/${row.id}`;
+                    return `<li><a href="${path}">${escapeHtml(row.title)}</a>`
+                        + (row.excerpt ? `<p>${escapeHtml(row.excerpt)}</p>` : '')
+                        + '</li>';
+                })
+                .join('');
+
+            html = injectRootContent(
+                html,
+                `<main style="max-width:1100px;margin:0 auto;padding:24px 18px;">`
+                    + `<h1>${escapeHtml(page.title.split(' — ')[0])}</h1>`
+                    + `<ul>${items}</ul>`
+                    + '</main>'
+            );
+        }
+
         writeRoute(page.path, html);
     }
 
-    const rows = await supabaseGet('/rest/v1/contents?select=id,type,title,excerpt,image,categoryName,author,date') || [];
     let generated = 0;
 
     for (const row of rows) {
